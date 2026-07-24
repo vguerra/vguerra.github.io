@@ -1,0 +1,57 @@
+---
+import { type CollectionEntry, getCollection } from "astro:content";
+import { Icon } from "astro-icon/components";
+import PageLayout from "@/layouts/Base.astro";
+
+const notes = (await getCollection("note")).sort((a, b) => a.data.order - b.data.order);
+
+// Group by category, preserving first-seen (README) order.
+const categories: string[] = [];
+const byCategory = new Map<string, CollectionEntry<"note">[]>();
+for (const note of notes) {
+	const category = note.data.category;
+	if (!byCategory.has(category)) {
+		byCategory.set(category, []);
+		categories.push(category);
+	}
+	byCategory.get(category)?.push(note);
+}
+
+const meta = {
+	description: "Self-contained study notes on machine learning, deep learning, and ML systems.",
+	title: "Notes",
+};
+---
+
+<PageLayout meta={meta}>
+	<section>
+		<h1 class="title mb-4 flex items-center gap-3">
+			Notes
+			<a class="text-accent" href="/notes/rss.xml" target="_blank">
+				<span class="sr-only">RSS feed</span>
+				<Icon aria-hidden="true" class="h-6 w-6" focusable="false" name="mdi:rss" />
+			</a>
+		</h1>
+		<p class="text-muted mb-10">
+			Self-contained concept references I keep while studying machine learning, deep learning, and
+			systems. Each note stands on its own.
+		</p>
+		{
+			categories.map((category) => (
+				<section class="mb-10">
+					<h2 class="title text-accent mb-4 text-xl">{category}</h2>
+					<ul class="space-y-3" role="list">
+						{byCategory.get(category)?.map((note) => (
+							<li>
+								<a class="cactus-link font-semibold" href={`/notes/${note.id}/`}>
+									{note.data.title}
+								</a>
+								{note.data.description && <span class="text-muted"> — {note.data.description}</span>}
+							</li>
+						))}
+					</ul>
+				</section>
+			))
+		}
+	</section>
+</PageLayout>

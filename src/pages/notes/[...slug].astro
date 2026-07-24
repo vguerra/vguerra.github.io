@@ -1,13 +1,13 @@
 ---
-import { getCollection } from "astro:content";
+import { getCollection, render } from "astro:content";
 import type { GetStaticPaths, InferGetStaticPropsType } from "astro";
-import Note from "@/components/note/Note.astro";
-import PageLayout from "@/layouts/Base.astro";
+import TOC from "@/components/blog/TOC.astro";
+import BaseLayout from "@/layouts/Base.astro";
+import { getFormattedDate } from "@/utils/date";
 
-// if you're using an adaptor in SSR mode, getStaticPaths wont work -> https://docs.astro.build/en/guides/routing/#modifying-the-slug-example-for-ssr
 export const getStaticPaths = (async () => {
-	const allNotes = await getCollection("note");
-	return allNotes.map((note) => ({
+	const notes = await getCollection("note");
+	return notes.map((note) => ({
 		params: { slug: note.id },
 		props: { note },
 	}));
@@ -16,15 +16,29 @@ export const getStaticPaths = (async () => {
 export type Props = InferGetStaticPropsType<typeof getStaticPaths>;
 
 const { note } = Astro.props;
-
-const meta = {
-	description:
-		note.data.description ||
-		`Read about my note posted on: ${note.data.publishDate.toLocaleDateString()}`,
-	title: note.data.title,
-};
+const { Content, headings, remarkPluginFrontmatter } = await render(note);
+const readingTime: string = remarkPluginFrontmatter.readingTime;
 ---
 
-<PageLayout meta={meta}>
-	<Note as="h1" note={note} />
-</PageLayout>
+<BaseLayout meta={{ title: note.data.title, description: note.data.description }}>
+	<article class="grow break-words" data-pagefind-body>
+		<div id="note-hero" class="mb-8">
+			<p class="text-muted mb-2 text-sm">
+				<a class="cactus-link" href="/notes/">Notes</a> / {note.data.category}
+			</p>
+			<h1 class="title">{note.data.title}</h1>
+			<div class="text-muted mt-2 flex flex-wrap items-center gap-x-3 text-sm">
+				{note.data.updatedDate && <span>Updated {getFormattedDate(note.data.updatedDate)}</span>}
+				<span>{readingTime}</span>
+			</div>
+		</div>
+		<div class="flex flex-col gap-10 lg:flex-row lg:items-start lg:justify-between">
+			{!!headings.length && <TOC headings={headings} />}
+			<div
+				class="prose prose-sm prose-headings:font-semibold prose-headings:text-accent-2 prose-headings:before:absolute prose-headings:before:-ms-4 prose-headings:before:text-muted prose-headings:hover:before:text-accent sm:prose-headings:before:content-['#'] sm:prose-th:before:content-none"
+			>
+				<Content />
+			</div>
+		</div>
+	</article>
+</BaseLayout>

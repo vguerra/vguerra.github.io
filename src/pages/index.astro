@@ -1,7 +1,6 @@
 ---
 import { type CollectionEntry, getCollection } from "astro:content";
 import PostPreview from "@/components/blog/PostPreview.astro";
-import Note from "@/components/note/Note.astro";
 import SocialList from "@/components/SocialList.astro";
 import { getAllPosts } from "@/data/post";
 import PageLayout from "@/layouts/Base.astro";
@@ -25,7 +24,7 @@ const pinnedPosts = allPostsByDate
 const MAX_NOTES = 5;
 const allNotes = await getCollection("note");
 const latestNotes = allNotes
-	.sort(collectionDateSort)
+	.sort((a, b) => a.data.order - b.data.order)
 	.slice(0, MAX_NOTES) as CollectionEntry<"note">[];
 ---
 
@@ -71,10 +70,15 @@ const latestNotes = allNotes
 				<h2 class="title text-accent mb-6 text-xl">
 					<a href="/notes/">Notes</a>
 				</h2>
-				<ul class="space-y-6" role="list">
+				<ul class="space-y-3" role="list">
 					{latestNotes.map((note) => (
 						<li>
-							<Note note={note} as="h3" isPreview />
+							<a class="cactus-link font-semibold" href={`/notes/${note.id}/`}>
+								{note.data.title}
+							</a>
+							{note.data.description && (
+								<span class="text-muted"> — {note.data.description}</span>
+							)}
 						</li>
 					))}
 				</ul>
