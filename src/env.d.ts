@@ -3,5 +3,3 @@ declare module "@pagefind/default-ui" {
 		constructor(arg: unknown);
 	}
 }
-
-declare module "rehype-figure";
