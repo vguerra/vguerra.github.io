@@ -12,7 +12,8 @@
 		"check": "astro check && biome check",
 		"lint": "biome check --write",
 		"format": "prettier -w . --cache",
-		"sync-wiki": "node scripts/sync-wiki.mjs"
+		"sync-wiki": "node scripts/sync-wiki.mjs",
+		"make-favicon": "node scripts/make-favicon.mjs"
 	},
 	"dependencies": {
 		"@astrojs/markdown-remark": "^7.2.1",
