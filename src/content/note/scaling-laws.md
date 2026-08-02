@@ -1,9 +1,9 @@
 ---
 title: "Scaling Laws & Chinchilla"
-description: "Chinchilla (C≈6ND, 20 tokens/param), Kaplan-era under-training, fitted loss model, inference-cost correction (overtraining)"
+description: "Chinchilla (C≈6ND, 20 tokens/param), Kaplan-era under-training, fitted loss model, inference-cost correction (overtraining), optimal-operating-point via local-quadratic fit"
 category: "Transformers & Sequence Models"
 order: 24
-updatedDate: "2026-07-20T20:57:48.379Z"
+updatedDate: "2026-07-25T20:28:48.770Z"
 ---
 **"Training Compute-Optimal Large Language Models"** (Hoffmann et al., DeepMind, 2022) — the
 **Chinchilla** paper. One of the most consequential results in LLM training strategy.
@@ -217,4 +217,39 @@ later field work (Anthropic RSP, OpenAI Preparedness, Wei et al. 2022 on emergen
 Schaeffer et al. 2023 on emergence as a metric artifact) that *uses* Chinchilla-style scaling laws
 as one input.
 
-Related: [[optimization]], [[learning-rate]], [[perplexity]], [[tokenization]]
+---
+
+## Finding the Optimal Operating Point by Fitting a Local Quadratic
+
+A practical scaling-law move: you have a handful of `(size, loss)` measurements and want the
+**loss-minimizing size**. Loss vs **log-compute (or log-size)** is locally U-shaped, so fit a
+parabola in `log10(size)` and read off its vertex.
+
+**Recipe:**
+1. Transform: `x = log10(size)` (the parabola is U-shaped in log-space, not raw size).
+2. Fit `L(x) = a·x² + b·x + c` by OLS — design matrix `[x², x, 1]`, solve the normal equations
+   (see [[regression-metrics]] for the polynomial-OLS setup).
+3. Vertex (the minimum, valid **because `a > 0`**):
+   $$x^* = -\frac{b}{2a} \qquad L_{\min} = c - \frac{b^2}{4a}$$
+   (`L_min` = substitute `x*` back in; or just `np.polyval([a,b,c], x_opt)`.)
+4. Undo the transform: `optimal_size = 10**x*`.
+
+**Robustness caveats (the interview follow-ups):**
+- **`a > 0` is load-bearing.** With noise or few points the fit can return `a ≤ 0` → `x*` is a
+  *maximum* or explodes (`a ≈ 0` → divide-by-~0). Guard it; the vertex is only a minimum when
+  `a > 0` (see [[linear-algebra-basics]] for why the fit can also be unstable).
+  - **Misconception:** fitting a degree-2 polynomial does *not* force `a > 0`, and neither does
+    having all-positive sizes/losses. The sign of `a` is **curvature** — how the *slope* changes —
+    determined entirely by the data's shape, not by the model choice or coordinate signs. Collinear
+    points → `a = 0`; concave (slope decreasing) → `a < 0`. `a > 0` holds **only if the sampled
+    sizes straddle the loss minimum** (loss goes down *and back up*). If every sample is still on
+    the descending branch (common — you haven't trained a big enough model to bottom out), the fit
+    gives `a ≈ 0` or `< 0` and `x*` is meaningless. The guard is really checking "did my data
+    capture the bottom of the curve?"
+- **Extrapolation.** Nothing forces `x*` inside the observed size range — a vertex beyond your
+  sampled points is an extrapolated guess. Consider clipping to `[min, max]` of observed log-sizes.
+- **Need ≥ 3 distinct x-values** or `XᵀX` is singular (3 coefficients). Fewer → `LinAlgError`.
+- `np.linalg.lstsq` (SVD) degrades more gracefully than `solve` if `X` is ill-conditioned;
+  log-transforming the sizes usually keeps conditioning fine.
+
+Related: [[optimization]], [[learning-rate]], [[perplexity]], [[tokenization]], [[regression-metrics]], [[linear-algebra-basics]]

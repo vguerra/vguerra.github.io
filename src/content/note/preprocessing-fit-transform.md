@@ -2,7 +2,7 @@
 title: "Preprocessing: Fit on Train, Apply Everywhere"
 description: "fit on train / apply everywhere, fit vs transform, data leakage, pipelines, CV"
 category: "Generalization & Model Fitting"
-order: 17
+order: 16
 updatedDate: "2026-07-14T14:17:10.320Z"
 ---
 One of the most important (and most tested) principles in applied ML:
