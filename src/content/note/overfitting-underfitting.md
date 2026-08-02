@@ -2,7 +2,7 @@
 title: "Diagnosing Overfitting vs Underfitting"
 description: "diagnosing via train/val curves, bias-variance, fixes, val<train edge case, quick triage"
 category: "Generalization & Model Fitting"
-order: 13
+order: 12
 updatedDate: "2026-07-14T09:46:31.172Z"
 ---
 ## Reading Train/Val Curves

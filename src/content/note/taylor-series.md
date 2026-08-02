@@ -1,8 +1,8 @@
 ---
 title: "Taylor Series"
 description: "definition, common expansions, computation, relevance to ML"
-category: "Training Dynamics & Optimization"
-order: 12
+category: "Math Foundations"
+order: 26
 updatedDate: "2026-07-05T12:13:51.020Z"
 ---
 ## Definition
