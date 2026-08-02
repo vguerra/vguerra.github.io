@@ -2,7 +2,7 @@
 title: "Regularization: L2 vs Dropout vs Early Stopping"
 description: "L2 vs dropout vs early stopping mechanics, L1 vs L2, inverted dropout, early-stopping↔L2, other approaches, reg term & validation loss"
 category: "Generalization & Model Fitting"
-order: 14
+order: 13
 updatedDate: "2026-07-14T14:14:59.119Z"
 ---
 Three common techniques to fight **overfitting**, each with a distinct mechanism.
