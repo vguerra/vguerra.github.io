@@ -1,3 +1,10 @@
+# Skip pnpm's pre-run dependency check before `pnpm <script>`. That check runs
+# an implicit `pnpm install`, which fires the `postinstall` sharp rebuild — and
+# sharp fails to build from source on some machines, breaking unrelated scripts
+# like `pnpm sync-wiki`. CI installs deps in its own step, so this only affects
+# local script invocations.
+verifyDepsBeforeRun: false
+
 overrides:
   sharp: ^0.34.5
 allowBuilds:
