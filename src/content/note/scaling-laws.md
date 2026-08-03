@@ -3,7 +3,7 @@ title: "Scaling Laws & Chinchilla"
 description: "Chinchilla (C≈6ND, 20 tokens/param), Kaplan-era under-training, fitted loss model, inference-cost correction (overtraining), optimal-operating-point via local-quadratic fit"
 category: "Transformers & Sequence Models"
 order: 24
-updatedDate: "2026-07-25T20:28:48.770Z"
+updatedDate: "2026-08-03T07:45:25.017Z"
 ---
 **"Training Compute-Optimal Large Language Models"** (Hoffmann et al., DeepMind, 2022) — the
 **Chinchilla** paper. One of the most consequential results in LLM training strategy.
@@ -149,8 +149,9 @@ nature. The deployment-optimal ratio is much higher.
 
 ## D and Training Time
 
-$$\text{steps} = \frac{D}{\text{batch size} \times \text{seq length}} \qquad
-\text{time} \approx \frac{6\,N\,D}{\text{throughput} \times \text{utilization (MFU)}}$$
+$$\text{steps} = \frac{D}{\text{batch size} \times \text{seq length}}$$
+
+$$\text{time} \approx \frac{6\,N\,D}{\text{throughput} \times \text{utilization (MFU)}}$$
 
 - Time per step is ~constant (fixed model + hardware) → **at fixed N, wall-clock time is linear
   in D**. Double the tokens = double the GPU-hours.
