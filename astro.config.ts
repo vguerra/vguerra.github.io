@@ -18,6 +18,7 @@ import { rehypeImageFigure } from "./src/plugins/rehype-image-figure";
 import { remarkAdmonitions } from "./src/plugins/remark-admonitions";
 import { remarkGithubCard } from "./src/plugins/remark-github-card";
 import { remarkReadingTime } from "./src/plugins/remark-reading-time";
+import { remarkWikiLinks } from "./src/plugins/remark-wiki-links";
 import { expressiveCodeOptions, siteConfig } from "./src/site.config";
 
 // https://astro.build/config
@@ -82,7 +83,14 @@ export default defineConfig({
 				rehypeImageFigure,
 				rehypeKatex,
 			],
-			remarkPlugins: [remarkMath, remarkReadingTime, remarkDirective, remarkGithubCard, remarkAdmonitions],
+			remarkPlugins: [
+				remarkMath,
+				remarkWikiLinks,
+				remarkReadingTime,
+				remarkDirective,
+				remarkGithubCard,
+				remarkAdmonitions,
+			],
 			remarkRehype: {
 				footnoteLabelProperties: {
 					className: [""],
