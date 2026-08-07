@@ -1,9 +1,9 @@
 ---
 title: "PyTorch nn Modules"
-description: "`nn.Linear`, `nn.Dropout`, custom `nn.Module`, manual weight init"
+description: "`nn.Linear`, `nn.Dropout`, custom `nn.Module`, manual weight init, `nn.Parameter` (vs `register_buffer`), `kaiming_uniform_` (Kaiming vs Xavier), `state_dict`/`load_state_dict`"
 category: "PyTorch — Tensors & Mechanics"
 order: 1
-updatedDate: "2026-07-11T20:44:52.244Z"
+updatedDate: "2026-08-07T20:54:07.463Z"
 ---
 ## nn.Linear
 
@@ -88,3 +88,89 @@ class MyModel(nn.Module):
 ```
 
 `super().__init__()` is mandatory — without it, PyTorch can't track parameters and calls like `model.parameters()` or `model.to(device)` will break.
+
+---
+
+## nn.Parameter — declaring learnable weights
+
+A **Tensor subclass** that, when assigned as an attribute of an `nn.Module`, is **automatically
+registered** as a learnable parameter.
+
+```python
+self.weight = nn.Parameter(torch.empty(out_features, in_features))
+```
+
+Registration means it automatically: appears in `model.parameters()` (**optimizer updates it**),
+appears in `model.state_dict()` (**saved/loaded**), moves with `model.to(device)`, and has
+`requires_grad=True` by default.
+
+**The three ways to attach a tensor to a module** (common interview probe):
+
+| | in `parameters()`? | optimized? | in `state_dict`? | use for |
+|---|---|---|---|---|
+| `nn.Parameter` | ✅ | ✅ | ✅ | learnable weights |
+| `register_buffer(...)` | ❌ | ❌ | ✅ | non-learned state (BN running stats, PE, masks) |
+| plain `self.x = tensor` | ❌ | ❌ | ❌ | ⚠️ usually a bug |
+
+**Gotcha:** a raw tensor assigned as an attribute is **not** registered → won't move to GPU with the
+model and won't be in the checkpoint. Learnable → `Parameter`; fixed state (e.g. a causal mask) →
+`register_buffer`.
+
+---
+
+## Weight init — `nn.init.kaiming_uniform_`
+
+**Trailing underscore = in-place.** Overwrites the tensor's values, returns the same tensor. Call it
+*on* an existing parameter:
+
+```python
+w = nn.Parameter(torch.empty(out_features, in_features))
+nn.init.kaiming_uniform_(w, mode='fan_in', nonlinearity='relu')
+```
+
+**What:** Kaiming/He init — samples `U(−bound, +bound)` with `bound` derived from the layer's **fan**
+so the **variance of activations stays roughly constant across depth** (else they explode/vanish).
+
+- **`mode`** — `'fan_in'` (default) preserves variance in the **forward** pass; `'fan_out'` in the
+  **backward** (gradient) pass.
+- **`nonlinearity`** — `'relu'` / `'leaky_relu'` sets the *gain*; `a` = leaky-ReLU negative slope.
+
+**Why Kaiming vs Xavier/Glorot:** Kaiming is for **ReLU-family** activations — ReLU zeros ~half the
+inputs (halving variance), so Kaiming uses a larger gain to compensate. **Xavier/Glorot** assumes a
+symmetric zero-centered activation (tanh/sigmoid) and doesn't account for ReLU's variance loss →
+wrong family = poor early training.
+
+*(Trivia: `nn.Linear`'s default is `kaiming_uniform_(a=√5)` — a historical quirk, not necessarily
+optimal, hence people often re-init explicitly.)*
+
+---
+
+## Checkpointing — `state_dict` / `load_state_dict`
+
+A **`state_dict`** is an `OrderedDict` of **name → tensor** for every registered Parameter and
+buffer — the **serializable snapshot of the numbers** (architecture NOT included).
+
+```python
+torch.save(model.state_dict(), "ckpt.pt")          # save
+
+model = MyModel(...)                                # 1. rebuild SAME architecture
+sd = torch.load("ckpt.pt", map_location="cpu")     # 2. load dict (map_location → device)
+model.load_state_dict(sd)                          # 3. copy tensors into the model
+```
+
+- **You load *into* an existing model** — `state_dict` holds only tensors, so build the architecture
+  first, then pour weights in. Preferred over `torch.save(model)` (pickles the whole object,
+  fragile across code changes).
+- **`strict=True` by default** — keys must match exactly or it raises. `strict=False` allows partial
+  loads and returns `(missing_keys, unexpected_keys)` — e.g. loading a pretrained backbone into a
+  model with a new head. `missing_keys` = params in the model but not the checkpoint → they keep
+  their **init values** (not loaded).
+- **Optimizer has its own `state_dict`** (momentum buffers, step counts) — save/load separately when
+  resuming training, or momentum resets.
+
+**How the three connect:** `Parameter` *declares* what's in the `state_dict`; `kaiming_uniform_`
+*fills* those parameters when training from scratch; `load_state_dict` *overwrites* them when
+resuming/fine-tuning. Init and loading are the two mutually-exclusive ways a parameter gets its
+starting values.
+
+Related: [[pytorch-basics]], [[tensor-devices]], [[regularization]]

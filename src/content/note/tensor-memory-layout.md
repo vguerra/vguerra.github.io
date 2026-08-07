@@ -3,7 +3,7 @@ title: "Tensor Memory Layout: Storage, Strides, Contiguity, view/reshape/permute
 description: "storage/strides/`data_ptr`, contiguity, `view` vs `reshape`, `permute`/`transpose`, `.contiguous()`"
 category: "PyTorch — Tensors & Mechanics"
 order: 3
-updatedDate: "2026-07-16T19:26:23.131Z"
+updatedDate: "2026-08-06T11:08:36.990Z"
 ---
 These five topics are really **one** concept: PyTorch separates a tensor's **shape (metadata)**
 from its underlying **memory (storage)**. Everything else follows.
@@ -120,6 +120,42 @@ x = x.contiguous().view(B, T, H*D)    # .contiguous() REQUIRED before view
 Without `.contiguous()`, `.view()` throws the stride error. Either insert `.contiguous()` before
 `view()`, or just use `reshape()` (does it for you). Some ops also internally require contiguous
 inputs.
+
+---
+
+## Shape-Manipulation Ops: flatten / squeeze / unsqueeze / transpose
+
+All are (mostly) **metadata-only** — the only question that matters is **"did it break
+contiguity?"** The stride-swap ops do; the others don't.
+
+| op | what it changes | view or copy | contiguity of result |
+|---|---|---|---|
+| `flatten` | merges dims (default → 1D; or a `start_dim..end_dim` range) | view if possible, else **copy** | contiguous |
+| `squeeze` | removes size-1 dim(s) | always view | **preserves** input's |
+| `unsqueeze` | adds a size-1 dim at a position | always view | **preserves** input's |
+| `transpose` / `permute` | reorders dims (stride swap) | always view | **non-contiguous** |
+
+```python
+x.flatten()              # → 1D; view if contiguous, else copies (same policy as reshape)
+x.flatten(1, 2)          # (N,C,H,W) → (N, C*H, W): merge a RANGE, not just full 1D
+
+x.squeeze()              # ⚠️ removes ALL size-1 dims — can silently eat a batch dim of 1
+x.squeeze(0)             # ✓ safer habit: name the dim, remove only what you intend
+x.unsqueeze(1)           # add a size-1 dim at position 1 (e.g. (N,) → (N,1))
+
+x.transpose(1, 2)        # swap two dims → NON-contiguous view
+x.transpose(1, 2).contiguous()   # why you often chain .contiguous() (see below)
+```
+
+**Key contrast:** `squeeze`/`unsqueeze` only add/drop a size-1 entry in shape+stride, so they can't
+disturb memory order — result is contiguous **iff the input was**. `transpose`/`permute` reorder
+strides → almost always **non-contiguous**, which is exactly why you see
+`.transpose(...).contiguous()` before a `view`. `flatten`, like `reshape`, is view-when-possible /
+copy-when-necessary.
+
+**Footgun:** bare `squeeze()` removes *every* singleton dim at once. In a training loop a batch or
+feature dim that happens to be size 1 gets silently dropped → shape bugs downstream. Always pass the
+`dim`.
 
 ---
 
