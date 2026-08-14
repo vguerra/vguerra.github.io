@@ -3,7 +3,7 @@ title: "PyTorch nn Modules"
 description: "`nn.Linear`, `nn.Dropout`, custom `nn.Module`, manual weight init, `nn.Parameter` (vs `register_buffer`), `kaiming_uniform_` (Kaiming vs Xavier), `state_dict`/`load_state_dict`"
 category: "PyTorch — Tensors & Mechanics"
 order: 1
-updatedDate: "2026-08-07T20:54:07.463Z"
+updatedDate: "2026-08-08T18:56:39.876Z"
 ---
 ## nn.Linear
 
@@ -139,6 +139,21 @@ so the **variance of activations stays roughly constant across depth** (else the
 inputs (halving variance), so Kaiming uses a larger gain to compensate. **Xavier/Glorot** assumes a
 symmetric zero-centered activation (tanh/sigmoid) and doesn't account for ReLU's variance loss →
 wrong family = poor early training.
+
+**Where the factor of 2 comes from (the quantitative core):** for a zero-mean symmetric input,
+ReLU zeros the entire negative half → `E[ReLU(x)²] = ½·E[x²]`. That's a **½ variance loss per
+layer**; over `L` layers the signal (and gradients) shrink by **(½)^L** → exponential vanishing.
+Xavier sets `Var(W) ≈ 1/fan` (assumes the activation *preserves* variance) so it under-scales for
+ReLU. Kaiming sets `Var(W) = 2/fan_in` — the **2 is exactly the reciprocal of ReLU's ½**, restoring
+unit variance per layer (`gain = √2`). So *Kaiming = Xavier + "undo ReLU's halving."*
+
+**`fan_in` vs `fan_out`:** `fan_in` stabilizes the **forward** activation variance; `fan_out` the
+**backward** gradient variance. You can't have both unless `fan_in = fan_out`.
+
+*Caveat:* the (½)^L catastrophe is the **plain deep-net** story. **Residual connections +
+normalization** make modern nets far less init-sensitive (signal has other paths, gets
+re-normalized) — init still affects stability/speed, but "wrong init → guaranteed failure" is
+softened.
 
 *(Trivia: `nn.Linear`'s default is `kaiming_uniform_(a=√5)` — a historical quirk, not necessarily
 optimal, hence people often re-init explicitly.)*

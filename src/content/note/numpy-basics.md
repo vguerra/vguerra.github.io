@@ -3,7 +3,7 @@ title: "NumPy Basics"
 description: "one-hot, argmax, rounding, type conversion, random matrices, `default_rng`, transpose, broadcasting, reshape, reductions, norms, ReLU, stable sigmoid"
 category: "NumPy & Python"
 order: 8
-updatedDate: "2026-07-18T14:12:32.571Z"
+updatedDate: "2026-08-11T12:03:28.263Z"
 ---
 ## One-Hot Encoding
 
@@ -261,6 +261,65 @@ x.var(dim=-1, keepdim=True, unbiased=False)  # unbiased=False → 1/N (matches L
 ```
 
 `np.var` uses `1/N` (population variance) by default. PyTorch `torch.var` defaults to `unbiased=True` (`1/(N-1)`) — set `unbiased=False` to match numpy/LayerNorm.
+
+### Computing mean/variance: stability & passes
+
+Two concerns hide behind "optimal": **numerical stability** and **number of passes**. They can
+conflict — and the fast shortcut is the unstable one.
+
+**Correct default** (`keepdims=True` so `x - mu` broadcasts — the LayerNorm pattern):
+```python
+mu  = np.mean(x, axis=-1, keepdims=True)
+var = np.var(x,  axis=-1, keepdims=True)   # ✅ np.var is internally two-pass & stable
+```
+
+**Efficiency note:** `np.var` computes the mean *itself* → calling `mean` + `var` computes the mean
+**twice**. If you need both, reuse `mu`:
+```python
+var = np.mean((x - mu)**2, axis=-1, keepdims=True)   # reuses mu; still stable
+```
+
+**The trap — the "one-pass" formula (DON'T):**
+```python
+var = np.mean(x**2, axis=-1, keepdims=True) - mu**2   # ⚠️ E[x²] − E[x]²
+```
+Algebraically correct but **catastrophic cancellation**: subtracts two large near-equal numbers. When
+the mean is large vs the variance (values ~1e6, variance ~1), you lose most significant digits and
+it can go **negative**. Centering *first* (`x - mu`) squares small numbers → no cancellation. That's
+why the two-pass form is preferred and why `np.var` uses it.
+
+| Approach | Passes | Stable? | Verdict |
+|---|---|---|---|
+| `np.mean` + `np.var` | 2 (mean twice) | ✅ | simplest default |
+| reuse `mu`, `mean((x-mu)²)` | one mean saved | ✅ | if you need both |
+| `mean(x²) − mu²` | 1 | ❌ | avoid |
+| Welford's algorithm | 1, streaming | ✅ | data too big for memory |
+
+For in-memory arrays the two-pass (vectorized C) is stable and fast — premature single-pass
+optimization is where bugs come from. Welford's only earns its keep for online/streaming data.
+
+### `torch.std` / `torch.var` correction (the N vs N−1 trap)
+
+Same divisor gotcha for **std**. Two equivalent knobs:
+
+```python
+x.std()                  # ⚠️ default: divisor N−1 (Bessel-corrected / unbiased / "sample")
+x.std(correction=0)      # divisor N (population)  — newer API
+x.std(unbiased=False)    # divisor N (population)  — older API, same thing
+```
+
+**Mental model:** `divisor = N − correction`.
+- `correction=0` → ÷N → **population** std (treat data as the entire population).
+- `correction=1` → ÷(N−1) → **sample / unbiased** std ← `torch.std`'s **default**.
+
+Cross-library: **`np.std` defaults to ÷N** (`ddof=0`), but **`torch.std` defaults to ÷(N−1)** — so
+default-vs-default they disagree. `torch.std(x, correction=0)` matches `np.std(x)`.
+
+Reduce over **all elements** → pass no `dim` (scalar out). Pass `dim=` for per-axis stds. Both
+`std`/`var` need a **float** dtype. `torch.std_mean(x)` / `torch.var_mean(x)` return both in one pass.
+
+**Decoding an instruction like "population std over all elements, not Bessel-corrected":**
+→ `torch.std(x, correction=0)` — `correction=0` (population) + no `dim` (all elements).
 
 ---
 
