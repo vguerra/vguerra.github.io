@@ -1,9 +1,9 @@
 ---
 title: "Broadcasting in PyTorch"
-description: "right-to-left alignment rules, stride-0 mechanism, (n,) vs (n,1) silent bug, `expand` vs `repeat`"
+description: "right-to-left alignment rules, stride-0 mechanism, (n,) vs (n,1) silent bug, `expand` vs `repeat`, `@` (matmul contracts) vs `*` (element-wise broadcasts)"
 category: "PyTorch — Tensors & Mechanics"
 order: 5
-updatedDate: "2026-07-16T19:53:02.720Z"
+updatedDate: "2026-08-16T15:14:08.870Z"
 ---
 Broadcasting combines tensors of **different shapes** in elementwise ops without copying memory.
 It's behind most concise tensor code — and the source of some of the nastiest **silent** bugs.
@@ -92,6 +92,44 @@ target = target.unsqueeze(1)        # make (n,1)
 pred   = pred.squeeze(1)            # or make (n,)
 ```
 Match shapes explicitly at every elementwise op / loss.
+
+---
+
+## `@` (matmul) does NOT broadcast the core dims — it contracts them
+
+Broadcasting is a property of **element-wise** ops (`+`, `-`, `*`, `/`). The matrix-multiply
+operator `@` is a **different beast**: it *reduces* a shared dimension instead of stretching it.
+
+```python
+a = np.random.randn(3, 3)
+w = np.random.randn(3)
+a @ w      # (3,)   — matrix-vector product, NOT (3,3)
+a * w      # (3,3)  — element-wise, w broadcast across rows
+```
+
+- **`a * w`** → element-wise. `w`=(3,) aligns right against `a`=(3,3) → treated as (1,3) → broadcast
+  down the rows → **(3,3)**. This is the "stretch a size-1 dim" behavior.
+- **`a @ w`** → matrix product. `w` is treated as a column; each row of `a` is **dot-producted**
+  with `w`, summing over the shared length-3 axis:
+
+  $$\text{result}[i] = \sum_j a[i,j]\,w[j]$$
+
+  Row (3 numbers) · `w` (3 numbers) → **one scalar**; 3 rows → **(3,)**. The shared dim is
+  **summed away**, not preserved.
+
+**Shape rule for `@`:** `(m, k) @ (k,) → (m,)`. The last axis of the left contracts with the axis of
+the right; the `k` **disappears**. Contrast `@`'s *contract-the-shared-dim* with broadcasting's
+*stretch-the-size-1-dim* — opposite behaviors on the same shapes:
+
+| shapes | `a * b` (element-wise, broadcasts) | `a @ b` (matmul, contracts) |
+|---|---|---|
+| `(4,3)`, `(3,)` | `(4,3)` — `b` stretched over rows | `(4,)` — 3-axis summed away |
+| `(3,3)`, `(3,)` | `(3,3)` | `(3,)` |
+| `(m,k)`, `(k,n)` | error (k≠n unless one is 1) | `(m,n)` — k contracted |
+
+> `@` *does* broadcast the **leading batch dims** (e.g. `(B,m,k)@(B,k,n)→(B,m,n)`, and a missing
+> batch dim broadcasts) — but the **last-two matrix dims always contract by the matmul rule**, never
+> element-wise. Broadcasting applies only to the batch dims, not to the contracted core.
 
 ---
 

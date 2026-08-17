@@ -2,7 +2,7 @@
 title: "Feature Selection: Removing Low-Variance / Uncorrelated Features"
 description: "low-variance / uncorrelated feature removal, interpreting `np.var`, univariate caveats, mutual info, model-based selection"
 category: "Generalization & Model Fitting"
-order: 15
+order: 17
 updatedDate: "2026-07-15T08:29:46.641Z"
 ---
 Filtering out uninformative features controls model complexity → helps fight overfitting

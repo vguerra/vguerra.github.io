@@ -2,7 +2,7 @@
 title: "NumPy Basics"
 description: "one-hot, argmax, rounding, type conversion, random matrices, `default_rng`, transpose, broadcasting, reshape, reductions, norms, ReLU, stable sigmoid"
 category: "NumPy & Python"
-order: 8
+order: 9
 updatedDate: "2026-08-11T12:03:28.263Z"
 ---
 ## One-Hot Encoding

@@ -2,7 +2,7 @@
 title: "Transformer Architecture"
 description: "FFN role, attention vs FFN, memory view of FFN"
 category: "Transformers & Sequence Models"
-order: 20
+order: 22
 updatedDate: "2026-07-06T19:51:02.505Z"
 ---
 ## What FFN Adds That Attention Cannot
