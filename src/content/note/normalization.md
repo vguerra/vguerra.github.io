@@ -2,7 +2,7 @@
 title: "Normalization"
 description: "LayerNorm formula, variance, LayerNorm vs BatchNorm, why γ/β exist, ICS caveat (loss-smoothing), 3 BN problems LN fixes, Pre-LN vs Post-LN, RMSNorm"
 category: "Transformers & Sequence Models"
-order: 23
+order: 30
 updatedDate: "2026-08-11T11:51:43.870Z"
 ---
 ## LayerNorm
