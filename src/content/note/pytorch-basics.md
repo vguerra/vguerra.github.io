@@ -1,9 +1,9 @@
 ---
 title: "PyTorch Basics"
-description: "dtype conversion, `.item()`, clamp, round, NLL loss, sigmoid, sqrt, in-place updates & `no_grad`, `requires_grad`, `torch.autograd.grad`, one-hot, (n,)↔(n,1)"
+description: "dtype conversion, `.item()`, clamp, round, NLL loss, sigmoid, sqrt, in-place updates & `no_grad`, `requires_grad`, `torch.autograd.grad`, one-hot, (n,)↔(n,1), logical reductions (`any`/`all` + `dim`, axis-that-disappears, `keepdim`, dead-neuron fraction)"
 category: "PyTorch — Tensors & Mechanics"
 order: 0
-updatedDate: "2026-07-13T14:29:13.202Z"
+updatedDate: "2026-08-18T11:41:00.090Z"
 ---
 ## In-Place Tensor Updates
 
@@ -58,6 +58,45 @@ a == b              # boolean tensor (True/False per element)
 ```
 
 **Best practice:** Always use `torch.allclose()` for floats — `==` fails due to precision. Never do `0.1 + 0.2 == 0.3` (False!).
+
+---
+
+## Logical Reductions & the "axis-that-disappears" rule
+
+Apply a logical op per column/row and reduce = boolean mask + `any`/`all` along a `dim`. PyTorch uses
+`dim` (not `axis`) and `keepdim` (not `keepdims`), but the semantics match NumPy exactly.
+
+```python
+torch.any(mask, dim=0)   # per COLUMN: any row True   → shape (ncols,)
+torch.all(mask, dim=0)   # per COLUMN: all rows True   → shape (ncols,)
+(x > 0).any(dim=0)       # comparison → mask → reduce (method form)
+(x == 0).all(dim=0)      # per column: every row zero? ("dead column")
+```
+
+**The rule (identical to NumPy): the `dim` you pass is the one that gets collapsed.**
+
+```
+x shape (R, C):
+  dim=0  → reduce rows    → (C,)   "per column"
+  dim=1  → reduce columns → (R,)   "per row"
+```
+
+So "per column, over rows" is **`dim=0`**. The reduced dim is **dropped** by default → `(C,)`; pass
+**`keepdim=True`** only when you need `(1, C)` to broadcast back against the original.
+
+```python
+(x <= 0).all(dim=0)                # → (C,)
+(x <= 0).all(dim=0, keepdim=True)  # → (1, C)
+```
+
+**Dead-neuron fraction** (activations `(batch, features)`; dead = ≤0 for *every* sample):
+```python
+dead = (acts <= 0).all(dim=0)      # (features,) bool — reduce over batch (rows)
+frac = dead.float().mean().item()  # cast bool→float first, then fraction in [0,1]
+```
+
+Note the `.float()`: `mean()` on a **bool** tensor isn't allowed — cast so True/False → 1.0/0.0.
+(In NumPy, `bool.mean()` works directly.) See the instrumentation use in [[pytorch-hooks]].
 
 ---
 

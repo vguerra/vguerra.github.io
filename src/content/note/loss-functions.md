@@ -2,7 +2,7 @@
 title: "Loss Functions"
 description: "MSE (Gaussian MLE, outlier-sensitivity), cross-entropy from logits (softmax → −log p_true, log-sum-exp stability, `torch.max` placement), Huber (δ, smooth L1), loss = MLE-under-noise unifying frame"
 category: "Misc ML Concepts"
-order: 48
+order: 55
 updatedDate: "2026-08-11T21:29:58.604Z"
 ---
 Quick map: **MSE** for numeric predictions, **cross-entropy** for choosing among classes,

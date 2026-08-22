@@ -2,7 +2,7 @@
 title: "ML Concepts"
 description: "Conv2d parameters, sigmoid, log"
 category: "Misc ML Concepts"
-order: 49
+order: 56
 updatedDate: "2026-07-02T19:13:05.240Z"
 ---
 ## Conv2d Learnable Parameters

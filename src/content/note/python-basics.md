@@ -2,7 +2,7 @@
 title: "Python Basics"
 description: "`match`, walrus, reshape/transpose tricks, string ops, dict max, char↔int, `assert` best practices"
 category: "NumPy & Python"
-order: 10
+order: 13
 updatedDate: "2026-07-25T20:33:43.301Z"
 ---
 ## Switch Statement (match)

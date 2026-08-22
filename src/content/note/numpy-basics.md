@@ -1,9 +1,9 @@
 ---
 title: "NumPy Basics"
-description: "one-hot, argmax, rounding, type conversion, random matrices, `default_rng`, transpose, broadcasting, reshape, reductions, norms, ReLU, stable sigmoid"
+description: "one-hot, argmax, rounding, type conversion, random matrices, `default_rng`, transpose, broadcasting, reshape, reductions, logical reductions (`any`/`all` + axis-that-disappears + `keepdims`), norms, ReLU, stable sigmoid"
 category: "NumPy & Python"
-order: 9
-updatedDate: "2026-08-11T12:03:28.263Z"
+order: 12
+updatedDate: "2026-08-18T11:40:50.509Z"
 ---
 ## One-Hot Encoding
 
@@ -239,6 +239,49 @@ PyTorch equivalent:
 ```python
 A.reshape(3, 4)      # same API
 A.view(3, 4)         # faster but requires contiguous memory
+```
+
+---
+
+## Logical Reductions & the "axis-that-disappears" rule
+
+Applying a **logical op per column/row and reducing** = a boolean mask + `any`/`all` along an axis.
+
+```python
+np.any(mask, axis=0)     # per COLUMN: True if ANY row is True   → shape (ncols,)
+np.all(mask, axis=0)     # per COLUMN: True if ALL rows are True → shape (ncols,)
+np.any(mask, axis=1)     # per ROW:    reduce over columns        → shape (nrows,)
+```
+
+Usually the mask comes from a comparison, then you reduce:
+```python
+(x > 0).any(axis=0)      # per column: does any row exceed 0?
+(x == 0).all(axis=0)     # per column: is every row zero? ("dead column" check)
+```
+
+**The rule that prevents the off-by-one-axis bug: the axis you pass is the one that gets
+*collapsed*.**
+
+```
+x shape (R, C):
+  axis=0  → reduce rows    → (C,)   "per column"
+  axis=1  → reduce columns → (R,)   "per row"
+```
+
+So "per column, reduce over rows" is **`axis=0`** — it *eats the row dimension* and leaves the
+columns. Add **`keepdims=True`** only when you want the result to stay 2-D as `(1, C)` so it
+**broadcasts back** against the original `(R, C)` (same reason as the LayerNorm/log-sum-exp shift);
+by default the reduced axis is **dropped**, giving `(C,)`.
+
+```python
+(x <= 0).all(axis=0)                 # → (C,)      — drop reduced axis (default)
+(x <= 0).all(axis=0, keepdims=True)  # → (1, C)    — keep it for broadcasting
+```
+
+**Dead-neuron fraction** (activations `(batch, features)`; dead = ≤0 for *every* sample):
+```python
+dead = (acts <= 0).all(axis=0)       # (features,) bool — reduce over batch (rows)
+frac = dead.mean()                   # fraction True in [0, 1]
 ```
 
 ---

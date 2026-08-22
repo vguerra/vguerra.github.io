@@ -2,7 +2,7 @@
 title: "RL Fundamentals"
 description: "on-policy vs off-policy (behavior/target policies, Q-learning vs SARSA, deadly triad, importance sampling, PPO clipped ratio, RLHF connection); GAE & the bias/variance tradeoff (advantage/baseline, TD residual, λ dial, γ vs λ)"
 category: "Reinforcement Learning"
-order: 30
+order: 37
 updatedDate: "2026-07-26T14:47:05.952Z"
 ---
 ## On-Policy vs Off-Policy

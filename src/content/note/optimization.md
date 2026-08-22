@@ -2,7 +2,7 @@
 title: "Optimization"
 description: "Hessian eigenvalues, saddle points, condition number, adaptive optimizers, Newton's method, convergence, 2nd-order at LLM scale"
 category: "Training Dynamics & Optimization"
-order: 12
+order: 18
 updatedDate: "2026-07-05T10:33:06.557Z"
 ---
 ## Convergence Stopping Criteria

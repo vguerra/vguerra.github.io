@@ -2,7 +2,7 @@
 title: "Attention-Free / Sub-Quadratic Architectures"
 description: "sub-quadratic landscape (linear attention, SSM/Mamba, Hyena, AFT), train/infer duality; linear attention deep-dive (kernel factorization, `(QKᵀ)V→Q(KᵀV)`, `d×d` recurrent state, feature maps, decay→RetNet/RWKV)"
 category: "Transformers & Sequence Models"
-order: 20
+order: 27
 updatedDate: "2026-07-26T15:30:23.748Z"
 ---
 Alternatives to softmax self-attention that avoid its **O(n²)** cost in sequence length (the `n×n`
