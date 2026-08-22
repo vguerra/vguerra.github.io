@@ -2,7 +2,7 @@
 title: "Positional Encoding"
 description: "sinusoidal PE, even/odd indices, frequency intuition, RoPE vs learned vs sinusoidal"
 category: "Transformers & Sequence Models"
-order: 21
+order: 28
 updatedDate: "2026-07-06T19:49:55.313Z"
 ---
 ## Sinusoidal Positional Encoding

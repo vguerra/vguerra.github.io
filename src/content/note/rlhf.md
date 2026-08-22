@@ -2,7 +2,7 @@
 title: "RLHF — Reinforcement Learning from Human Feedback"
 description: "RLHF pipeline (pretraining → SFT → reward model + PPO), SFT model & its 3 roles, reward model from pairwise preferences (Bradley-Terry, architecture, margin, shift-invariance), PPO + KL penalty, reward hacking, DPO/RLAIF"
 category: "Reinforcement Learning"
-order: 29
+order: 36
 updatedDate: "2026-07-26T15:11:19.650Z"
 ---
 Aligning a pretrained LLM to human preferences. Standard three-stage pipeline:

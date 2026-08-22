@@ -1,9 +1,9 @@
 ---
 title: "Training Diagnostics — Debugging Why a Model Won't Learn"
-description: "debugging why a model won't learn: reading loss-curve shapes (flat/plateau/spiky/NaN, `log C` random baseline), the 3 silent failures (dead ReLU, vanishing/exploding gradients + causes/fixes), residuals + norm as gradient highways, per-layer health check & log-scale gradient-norm plot, Karpathy's recipe (overfit one batch first)"
+description: "debugging why a model won't learn: reading loss-curve shapes (flat/plateau/spiky/NaN, `log C` random baseline), the 3 silent failures (dead ReLU, vanishing/exploding gradients + causes/fixes), residuals + norm as gradient highways, per-layer health check & log-scale gradient-norm plot, parameter-update-ratio ≈1e-3 heuristic, debugging by `.grad` state (None/zero/NaN/params-not-changing symptom→cause table), Karpathy's recipe (overfit one batch first)"
 category: "Training Dynamics & Optimization"
-order: 11
-updatedDate: "2026-08-16T16:40:16.300Z"
+order: 15
+updatedDate: "2026-08-21T19:23:49.724Z"
 ---
 Training diagnostics catch the bugs that keep a model from learning well. In practice we
 **inspect activations, gradients, and loss curves** to figure out *why* a net isn't learning.
@@ -134,6 +134,50 @@ detached scalars): see [[pytorch-hooks]].*
 **y-axis on a log scale**, layer index on x. A steady **downward slope from output → input layers**
 *is* vanishing gradients made visible; a sharp upward spike is where things explode. This turns "the
 net isn't learning" into "layers 0–3 get no gradient."
+
+---
+
+## The parameter-update-ratio heuristic (≈ 1e-3)
+
+A quantitative health check beyond "is the gradient norm sane": track the **relative update size**
+per parameter tensor:
+
+$$\text{ratio} = \frac{\eta \, \lVert \nabla_\theta \mathcal{L} \rVert}{\lVert \theta \rVert}$$
+
+i.e. *how big is the step relative to the weights it's changing.* It should sit around **`1e-3`**
+(roughly: weights change by ~0.1% per step).
+
+- **≫ 1e-3** (e.g. 1e-1) → learning rate **too high** — updates are large relative to the weights.
+- **≪ 1e-3** (e.g. 1e-6) → learning rate **too low** — weights barely move, training crawls.
+
+Compute it per layer/parameter after `backward()` (`p.grad.norm()` and `p.norm()`, guarding
+`p.grad is not None` — see [[pytorch-hooks]]). This is Karpathy's rule and a fast way to sanity-check
+an LR without a full sweep.
+
+**Other quick instruments:**
+- **Overfit one batch** (also in the recipe below) — the single best bug test.
+- **Set random seeds** while debugging (weight init, shuffling, dropout masks) so a code change's
+  effect is isolated from run-to-run randomness.
+- **Extract scalars for logging** — accumulate `loss.item()`, never the loss *tensor*, or you leak the
+  graph and OOM ([[training-memory]]).
+
+---
+
+## Debugging by reading the `.grad` state
+
+Inspecting `p.grad` after `backward()` localizes the problem by **symptom**:
+
+| `.grad` symptom | Cause |
+|---|---|
+| **`None`** *(after a backward that should fill it)* | parameter **not involved** in computing the loss — layer unused in forward, path **detached**, or gradient tracking **disabled** (`no_grad`). |
+| **exactly `0`** | parameter **doesn't affect the loss** at the current point — classic **dead ReLU** (neuron's inputs all negative → output 0 → zero gradient → can't recover). |
+| **`NaN` / `Inf`** | numerical instability (÷0, `log(0)`, overflow) — **propagates through the update and corrupts all subsequent steps**. |
+| **loss not decreasing** | LR wrong (too high → oscillation, too low → plateau), **or** forgot `zero_grad()` → gradients accumulate across steps → effective grad grows → divergence. **Monitor gradient norm per step.** |
+| **params not changing** | update not landing — likely **out-of-place** `w = w - lr*g` (rebinds the name to a *new* tensor; any holder of the original keeps the stale one) instead of **in-place** `w.sub_(lr*g)` (mutates the object everyone references). **Snapshot values before/after to verify** (see [[pytorch-basics]]). |
+
+**`None` is not always a bug:** it's legitimately `None` **before the first `backward()`** and **right
+after `zero_grad(set_to_none=True)`** (the modern default). Only `None` *after* a backward you
+expected to populate it indicates the unused-param/detached/`no_grad` problem.
 
 ---
 

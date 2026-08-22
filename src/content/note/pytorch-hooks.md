@@ -2,7 +2,7 @@
 title: "PyTorch Hooks & Iterating a Module's Layers"
 description: "iterating layers (`named_modules`/`children`/`named_parameters`, leaf filter), forward/backward/tensor hooks, `handle.remove()` lifecycle, `p.grad` (param) vs `grad_output` (activation) grad, why to `detach().std().item()` instead of stashing outputs"
 category: "PyTorch — Tensors & Mechanics"
-order: 8
+order: 10
 updatedDate: "2026-08-16T16:40:01.168Z"
 ---
 Hooks let you **observe or modify** the inputs/outputs/gradients of a module *without editing its

@@ -2,7 +2,7 @@
 title: "Linear Algebra Basics"
 description: "singular matrices (equivalent characterizations, why they break OLS), near-singular / condition number, detecting rank-deficiency"
 category: "Math Foundations"
-order: 27
+order: 34
 updatedDate: "2026-07-25T19:50:03.824Z"
 ---
 ## Singular Matrices
