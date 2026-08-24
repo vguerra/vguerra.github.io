@@ -2,7 +2,7 @@
 title: "Learning Rate: Effect on Convergence & How to Tune It"
 description: "LR effect on convergence/stability, tuning (log-scale, loss-curve, LR range test); SGD vs SGD+momentum vs Adam update rules + when-preferred; batch-size-1 SGD; warmup + decay schedules"
 category: "Training Dynamics & Optimization"
-order: 19
+order: 20
 updatedDate: "2026-07-18T14:04:37.187Z"
 ---
 ## How LR Affects Convergence / Stability

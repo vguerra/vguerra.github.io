@@ -2,7 +2,7 @@
 title: "DataLoader & Batching"
 description: "`DataLoader` params (batch_size, shuffle & gradient bias, drop_last, num_workers, pin_memory), throughput vs statistics knobs, keeping the GPU fed"
 category: "Training Dynamics & Optimization"
-order: 16
+order: 17
 updatedDate: "2026-08-19T15:20:22.836Z"
 ---
 The data-feeding half of the training loop. Key `torch.utils.data.DataLoader` parameters and *why*
