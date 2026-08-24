@@ -2,7 +2,7 @@
 title: "Scaling Laws & Chinchilla"
 description: "Chinchilla (C≈6ND, 20 tokens/param), Kaplan-era under-training, fitted loss model, inference-cost correction (overtraining), optimal-operating-point via local-quadratic fit"
 category: "Transformers & Sequence Models"
-order: 33
+order: 34
 updatedDate: "2026-08-03T07:45:25.017Z"
 ---
 **"Training Compute-Optimal Large Language Models"** (Hoffmann et al., DeepMind, 2022) — the

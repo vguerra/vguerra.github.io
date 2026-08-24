@@ -2,7 +2,7 @@
 title: "Word Embeddings"
 description: "embedding table `(vocab, d)`, differentiable lookup via one-hot-matmul view + sparse per-row gradient, why similar words cluster (distributional hypothesis, emergent not designed), static/context-free nature, weight tying, `padding_idx`"
 category: "Transformers & Sequence Models"
-order: 25
+order: 26
 updatedDate: "2026-08-20T14:41:18.964Z"
 ---
 Neural nets can't process raw text, so tokens are mapped to **dense vectors** where similar words end

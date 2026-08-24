@@ -2,7 +2,7 @@
 title: "Modern GPU Programming for MLSys — Reading Index"
 description: "reading index for the book: chapter map, note names, and how it connects to the rest of these notes"
 category: "GPU — Hardware & Execution Model"
-order: 38
+order: 39
 updatedDate: "2026-08-17T20:24:50.784Z"
 ---
 Notes taken while working through

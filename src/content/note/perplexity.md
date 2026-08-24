@@ -2,7 +2,7 @@
 title: "Perplexity"
 description: "definition, stable log-prob implementation, why not to multiply probs"
 category: "Transformers & Sequence Models"
-order: 32
+order: 33
 updatedDate: "2026-07-02T19:59:16.201Z"
 ---
 ## Definition

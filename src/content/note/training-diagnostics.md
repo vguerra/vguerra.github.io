@@ -2,7 +2,7 @@
 title: "Training Diagnostics — Debugging Why a Model Won't Learn"
 description: "debugging why a model won't learn: reading loss-curve shapes (flat/plateau/spiky/NaN, `log C` random baseline), the 3 silent failures (dead ReLU, vanishing/exploding gradients + causes/fixes), residuals + norm as gradient highways, per-layer health check & log-scale gradient-norm plot, parameter-update-ratio ≈1e-3 heuristic, debugging by `.grad` state (None/zero/NaN/params-not-changing symptom→cause table), Karpathy's recipe (overfit one batch first)"
 category: "Training Dynamics & Optimization"
-order: 15
+order: 16
 updatedDate: "2026-08-21T19:23:49.724Z"
 ---
 Training diagnostics catch the bugs that keep a model from learning well. In practice we
