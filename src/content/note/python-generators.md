@@ -2,7 +2,7 @@
 title: "Python Generators — `yield`, `yield from`, and typing"
 description: "`yield` (lazy produce-and-suspend, generator objects, infinite sequences) & `yield from` (delegate to sub-iterable, forward send/throw, capture inner `return` value), flatten-nested-strings gotcha, typing generators (`Iterator[T]` vs `Generator[Y,S,R]`)"
 category: "NumPy & Python"
-order: 14
+order: 15
 updatedDate: "2026-08-24T17:02:53.271Z"
 ---
 Generators produce values **lazily** (on demand), so they represent huge or infinite sequences with

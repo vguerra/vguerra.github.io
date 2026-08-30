@@ -2,7 +2,7 @@
 title: "Tokenization"
 description: "how BPE/WordPiece handles rare words, numbers, code"
 category: "Transformers & Sequence Models"
-order: 32
+order: 37
 updatedDate: "2026-07-04T19:31:37.838Z"
 ---
 ## How Tokenization Affects Rare Words, Numbers, and Code
