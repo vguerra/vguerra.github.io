@@ -2,7 +2,7 @@
 title: "Regression: OLS and R²"
 description: "OLS (normal equations), R² definition/interpretation, negative R², adjusted R², polynomial fitting (`np.polyfit` / `Polynomial.fit`)"
 category: "Generalization & Model Fitting"
-order: 23
+order: 26
 updatedDate: "2026-07-24T21:10:30.978Z"
 ---
 ## OLS — Ordinary Least Squares

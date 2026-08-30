@@ -1,9 +1,9 @@
 ---
 title: "Word Embeddings"
-description: "embedding table `(vocab, d)`, differentiable lookup via one-hot-matmul view + sparse per-row gradient, why similar words cluster (distributional hypothesis, emergent not designed), static/context-free nature, weight tying, `padding_idx`"
+description: "embedding table `(vocab, d)`, differentiable lookup via one-hot-matmul view + sparse per-row gradient, why similar words cluster (distributional hypothesis, emergent not designed), static/context-free nature, weight tying, `padding_idx`; Bag-of-Words mean-pooling + sentiment pipeline, permutation-invariance limitation (negation/order-blindness), masked-mean padding fix"
 category: "Transformers & Sequence Models"
-order: 26
-updatedDate: "2026-08-20T14:41:18.964Z"
+order: 30
+updatedDate: "2026-08-24T19:09:48.103Z"
 ---
 Neural nets can't process raw text, so tokens are mapped to **dense vectors** where similar words end
 up close together. This note covers what the embedding table *is*, why the lookup is differentiable,
@@ -76,5 +76,55 @@ variable-length sequences batch cleanly (see [[dataloader-and-batching]]).
 
 ---
 
+## Bag-of-Words pooling & a sentiment pipeline
+
+**Bag of Words (BoW)** collapses a variable-length sequence of embedding vectors into **one
+fixed-size vector by averaging** (mean-pooling over the sequence). Word **order is discarded** (hence
+"bag"), yet the representation carries enough signal for many classification tasks.
+
+A minimal binary-sentiment pipeline:
+
+```
+token ids (batch, seq)
+  → Embedding(V, 16)      → (batch, seq, 16)
+  → mean over seq (dim=-2)→ (batch, 16)          # BoW pooling
+  → Linear(16, 1)         → (batch, 1)           # = logistic regression on pooled features
+  → Sigmoid               → probability
+```
+
+- **Pool over the sequence axis:** for `(batch, seq, embed)` that's `dim=1` **= `dim=-2`**. Prefer the
+  **negative index (`-2`)** — it means "the sequence axis" regardless of extra leading dims
+  (`-1`=embed, `-2`=seq). `mean(dim=-1)` would wrongly average the *features*.
+- **Training-loss note:** use **`BCEWithLogitsLoss` on the raw logit** (drop the `Sigmoid` for the
+  loss) — same log-sum-exp fusion/stability argument as cross-entropy ([[loss-functions]]). Apply the
+  sigmoid only at inference.
+
+### The permutation-invariance limitation
+
+Averaging is a **permutation-invariant** operation, so any two sentences with the same *multiset* of
+words pool to the **identical** vector → identical prediction. "man bites dog" ≡ "dog bites man";
+**"not good"** can't be distinguished from "good." **Order information is destroyed at the pooling
+step**, before the classifier sees it — no training can recover it. This is *the* motivation for
+order-sensitive models: RNNs, and attention + [[positional-encoding]].
+
+### The padding bug — masked mean
+
+Batched sequences are **padded** to equal length, so a naive `mean(dim=-2)` averages the **pad-token
+embeddings too**, diluting the signal (more for shorter sentences). Masking the numerator isn't
+enough — the **denominator** must also exclude pads (divide by real-token count, not `seq_len`):
+
+```
+numerator   = (emb * mask.unsqueeze(-1)).sum(dim=-2)          # zero pads, sum over seq → (batch, embed)
+denominator = mask.sum(dim=-1, keepdim=True).clamp(min=1)     # real-token count; clamp guards all-pad
+pooled      = numerator / denominator
+```
+
+- `mask` is `(batch, seq)` with 1=real, 0=pad → **`unsqueeze(-1)`** so it broadcasts against
+  `(batch, seq, embed)` (see [[broadcasting]]).
+- `mask.sum(dim=-1)` = number of real tokens per sequence; **`clamp(min=1)`** avoids ÷0 on an
+  all-padding row.
+
+---
+
 Related: [[self-attention]], [[transformer-architecture]], [[tokenization]], [[tensor-indexing]],
-[[positional-encoding]]
+[[positional-encoding]], [[loss-functions]], [[broadcasting]]

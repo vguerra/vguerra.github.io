@@ -1,9 +1,9 @@
 ---
 title: "Regularization: L2 vs Dropout vs Early Stopping"
-description: "L2 vs dropout vs early stopping mechanics, L1 vs L2, inverted dropout, early-stopping↔L2, other approaches, reg term & validation loss"
+description: "L2 vs dropout vs early stopping mechanics, L1 vs L2, L2-penalty vs decoupled weight decay (AdamW: identical for SGD, differ under Adam's `1/√v` scaling), inverted dropout, early-stopping↔L2, other approaches, reg term & validation loss"
 category: "Generalization & Model Fitting"
-order: 22
-updatedDate: "2026-07-14T14:14:59.119Z"
+order: 25
+updatedDate: "2026-08-27T20:28:05.187Z"
 ---
 Three common techniques to fight **overfitting**, each with a distinct mechanism.
 
@@ -25,6 +25,36 @@ L_total = L_data + λ · Σ w²
 **Effect / intuition:** controls model complexity by keeping weights small. Encourages the model to **use all features a little** rather than a few features a lot.
 
 **Contrast with L1** (Σ|w|): L1 has a constant-magnitude gradient (`±λ`) that doesn't shrink as weights approach 0, so it drives many weights **exactly to 0** → **sparsity / feature selection**. L2 → shrinkage; L1 → sparsity.
+
+### L2 penalty vs (decoupled) weight decay — *not* the same with Adam
+
+"L2 regularization" and "weight decay" are treated as synonyms, but they only coincide for **plain
+SGD**. They diverge once the optimizer is adaptive.
+
+- **L2 penalty:** add `λ‖θ‖²` to the **loss** → the gradient gains a `+λθ` term → that term flows
+  **through the optimizer's machinery** (momentum EMA, and crucially Adam's `1/√v` per-parameter
+  scaling).
+- **Decoupled weight decay:** shrink the weights **directly, as a separate step** —
+  `θ ← (1 − lr·λ)θ` — *outside* the gradient update.
+
+**Plain SGD → identical.** L2 gives `θ ← θ − lr(g + λθ) = (1 − lr·λ)θ − lr·g`, which *is* decoupled
+weight decay. So the folklore holds here.
+
+**Adam → substantially different (the AdamW point, Loshchilov & Hutter).** With L2, the `λθ` term rides
+through the `1/√v` division, so the **effective decay becomes `∝ λθ/√v`** — inversely coupled to each
+parameter's gradient history. Backwards from what you want: a large, actively-used weight (big `√v`)
+gets its decay **divided down → barely shrinks**, while low-gradient weights get *more* decay.
+Regularization strength becomes an artifact of optimization dynamics, not a clean prior.
+
+**Why decoupling (AdamW) fixes it:** applying `θ ← (1 − lr·λ)θ` as a **separate step never touches
+`√v`**, restoring a **uniform relative shrink** on every parameter (the intended prior) — the same
+relative decay *regardless of gradient history*. It disentangles two jobs L2-in-Adam accidentally
+fused: **`1/√v` adapts the loss-gradient step** (keep — helps optimization) while **weight decay
+shrinks uniformly** (helps generalization). Bonus: `λ` becomes far more stable across architectures / LR
+schedules. This is why **AdamW is the default for modern transformer training**, and why the "L2 =
+weight decay" shorthand is silently wrong for Adam. (Momentum alone causes only a *mild* version of this
+— the `λθ` term entering the velocity EMA; the `√v` scaling is the dominant effect. See [[momentum]],
+[[learning-rate]].)
 
 ---
 

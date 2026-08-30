@@ -1,9 +1,9 @@
 ---
 title: "PyTorch nn Modules"
-description: "`nn.Linear`, `nn.Dropout`, custom `nn.Module`, manual weight init, `nn.Parameter` (vs `register_buffer`), `kaiming_uniform_` (Kaiming vs Xavier), `state_dict`/`load_state_dict`"
+description: "`nn.Linear`, `nn.Dropout`, custom `nn.Module`, manual weight init, `nn.Parameter` (vs `register_buffer`), `kaiming_uniform_` (symmetry breaking, variance-propagation formula, Kaiming vs Xavier exact formulas + uniform/normal variants & the factor-6), `state_dict`/`load_state_dict`"
 category: "PyTorch — Tensors & Mechanics"
 order: 1
-updatedDate: "2026-08-08T18:56:39.876Z"
+updatedDate: "2026-08-25T11:50:31.565Z"
 ---
 ## nn.Linear
 
@@ -130,6 +130,35 @@ nn.init.kaiming_uniform_(w, mode='fan_in', nonlinearity='relu')
 
 **What:** Kaiming/He init — samples `U(−bound, +bound)` with `bound` derived from the layer's **fan**
 so the **variance of activations stays roughly constant across depth** (else they explode/vanish).
+
+**Why init matters at all — symmetry breaking.** If **all weights start at 0** (or any identical
+value), every neuron in a layer computes the **same output** and receives the **identical gradient** →
+they update in lockstep and stay identical forever. The layer collapses to **one effective neuron
+regardless of width**, and no amount of training separates them. **Random** init breaks this symmetry
+— but the **scale** of the random values is what then decides explode-vs-vanish.
+
+**The variance-propagation formula (why `fan` enters).** For `y = Wx` with independent zero-mean
+weights and inputs, each output element has variance:
+
+$$\mathrm{Var}(y_j) = n_{in}\,\mathrm{Var}(w)\,\mathrm{Var}(x)$$
+
+So over `L` layers the activation variance scales like `(n·Var(w))^L` — **`>1` → explode, `<1` →
+vanish** exponentially. Keeping it ~constant requires `n·Var(w) ≈ 1`, i.e. **`Var(w) ≈ 1/fan`** — the
+origin of every fan-based init.
+
+**Xavier/Glorot — the exact formula.** Forward stability wants `Var(w) = 1/n_in`; backward (gradient)
+stability wants `1/n_out`. You can't have both unless `n_in = n_out`, so Xavier **compromises** by
+averaging the two:
+
+$$\mathrm{Var}(w) = \frac{2}{n_{in} + n_{out}}$$
+
+**Uniform vs Normal variants + the "factor of 6."** Both Xavier and He come in two forms:
+- **Normal:** `N(0, std)` with `std = √Var(w)`.
+- **Uniform:** `U(−a, a)` where `a = √(3·Var(w))`. The `3` (→ the `6` you see in bounds like
+  `√(6/(n_in+n_out))`) comes from `Var(U(−a,a)) = a²/3` — solve `a²/3 = Var(w)` for `a`.
+
+So Xavier-uniform is `U(−√(6/(n_in+n_out)), +√(6/(n_in+n_out)))`; He-uniform is
+`U(−√(6/n_in), +√(6/n_in))`.
 
 - **`mode`** — `'fan_in'` (default) preserves variance in the **forward** pass; `'fan_out'` in the
   **backward** (gradient) pass.

@@ -2,7 +2,7 @@
 title: "Self-Attention"
 description: "scaled dot-product attention, QKV, softmax gotchas"
 category: "Transformers & Sequence Models"
-order: 27
+order: 31
 updatedDate: "2026-07-05T14:30:04.454Z"
 ---
 ## Scaled Dot-Product Attention

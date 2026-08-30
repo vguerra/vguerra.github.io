@@ -2,7 +2,7 @@
 title: "Type Annotations in Python"
 description: "what to annotate (signatures, not locals), modern syntax (`list[int]`, `X | None`), accept-broadly/return-specifically, dataclass/TypedDict/Literal/Protocol/Final, PEP 695 generics, pyright vs mypy (hints inert without a checker), `Any` vs `object`"
 category: "NumPy & Python"
-order: 15
+order: 16
 updatedDate: "2026-08-21T12:15:17.131Z"
 ---
 Short version: **annotate function signatures, let locals be inferred, use modern built-in syntax,

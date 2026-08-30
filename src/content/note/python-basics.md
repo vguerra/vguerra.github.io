@@ -2,8 +2,8 @@
 title: "Python Basics"
 description: "`match`, walrus, reshape/transpose tricks, string ops, dict max, char↔int, `assert` best practices"
 category: "NumPy & Python"
-order: 13
-updatedDate: "2026-07-25T20:33:43.301Z"
+order: 14
+updatedDate: "2026-08-30T14:38:52.698Z"
 ---
 ## Switch Statement (match)
 
@@ -150,6 +150,19 @@ max(freq, key=freq.get)   # 'b'
 ```
 
 Ties: `max()` returns the **first one encountered** (insertion order, Python 3.7+).
+
+**Deliberate tie-breaking — compose a tuple key** `(value, tiebreaker)`. Tuples compare
+lexicographically, so equal values fall through to the second element:
+```python
+max(freq, key=lambda k: (freq[k], k))     # max value; among ties, the LARGEST key
+min(freq, key=lambda k: (-freq[k], k))    # max value; among ties, the SMALLEST key (e.g. alphabetical)
+```
+The `min` + negated-value trick expresses "highest value, smallest key on ties" — flip the value into a
+min problem so the secondary key still sorts ascending. Note you **can't** add a tiebreaker to
+`key=freq.get`; the moment you need a secondary criterion, switch to the `lambda k: (freq[k], …)` form.
+
+*Float caution:* if the values are computed floats, equality ties are fragile (`v == top` can miss
+near-ties) — round or use a tolerance (see [[pytorch-basics]] on float comparison).
 
 To get **all** keys with the max value:
 ```python
