@@ -2,7 +2,7 @@
 title: "Tensor Shape Typing — jaxtyping (and torchtyping)"
 description: "annotating tensor shape+dtype with jaxtyping (`Float[Tensor, \"batch seq dim\"]`, axis grammar `*`/`#`/`...`, the `@jaxtyped` binding-scope gotcha, enforce-at-boundaries) and legacy torchtyping (`TensorType`, `patch_typeguard`)"
 category: "PyTorch — Tensors & Mechanics"
-order: 11
+order: 12
 updatedDate: "2026-08-20T20:07:53.517Z"
 ---
 Annotate tensor **shape + dtype** in type hints so mismatches are caught at a function boundary

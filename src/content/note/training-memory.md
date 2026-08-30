@@ -2,7 +2,7 @@
 title: "Memory Management During Training"
 description: "where GPU memory goes (params/gradients/optimizer-state Adam×4/activations/graph), 16 bytes-per-param rule, the accumulate-loss-tensor OOM pitfall (`.item()`/`.detach()`), levers to reduce memory"
 category: "Training Dynamics & Optimization"
-order: 18
+order: 19
 updatedDate: "2026-08-19T15:20:37.833Z"
 ---
 Where GPU memory goes during training, and the graph-lifetime pitfall that silently OOMs you.
