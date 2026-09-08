@@ -2,7 +2,7 @@
 title: "Convolution (Conv2d)"
 description: "Conv2d: weight sharing & translation equivariance, cross-correlation vs true convolution (framework gotcha), multi-channel formula & shapes `(C_out,C_in,k,k)`, output-size formula, im2col (conv as GEMM), receptive field `1+L(k−1)` (why 2×3×3 beats 5×5), params & MACs-vs-FLOPs"
 category: "Misc ML Concepts"
-order: 63
+order: 65
 updatedDate: "2026-08-28T14:28:05.362Z"
 ---
 The core operation of CNNs. Instead of connecting every input to every output (fully-connected), a
