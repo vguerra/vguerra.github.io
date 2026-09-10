@@ -1,9 +1,9 @@
 ---
 title: "Word Embeddings"
-description: "embedding table `(vocab, d)`, differentiable lookup via one-hot-matmul view + sparse per-row gradient, why similar words cluster (distributional hypothesis, emergent not designed), static/context-free nature, weight tying, `padding_idx`; Bag-of-Words mean-pooling + sentiment pipeline, permutation-invariance limitation (negation/order-blindness), masked-mean padding fix"
+description: "embedding table `(vocab, d)`, differentiable lookup via one-hot-matmul view + sparse per-row gradient, why similar words cluster (distributional hypothesis, emergent not designed), static/context-free nature, weight tying, `padding_idx`; one-hot limits & count-based (LSA/GloVe) vs prediction-based (Word2Vec/BERT) vs contextual embeddings, Word2Vec (CBOW/skip-gram/negative-sampling); Bag-of-Words mean-pooling + sentiment pipeline, permutation-invariance limitation (negation/order-blindness), masked-mean padding fix"
 category: "Transformers & Sequence Models"
-order: 30
-updatedDate: "2026-08-24T19:09:48.103Z"
+order: 41
+updatedDate: "2026-09-10T21:29:19.706Z"
 ---
 Neural nets can't process raw text, so tokens are mapped to **dense vectors** where similar words end
 up close together. This note covers what the embedding table *is*, why the lookup is differentiable,
@@ -73,6 +73,39 @@ the geometry is **emergent, not designed**.
 
 Other details: **`padding_idx`** reserves a row (usually zeros, no gradient) for the pad token so
 variable-length sequences batch cleanly (see [[dataloader-and-batching]]).
+
+---
+
+## Why not one-hot? Count-based vs prediction-based
+
+**One-hot** (each word = a unique `[0,…,1,…,0]`) fails: **no meaning** (all words equidistant), **huge &
+sparse** (inefficient), **no generalization** (can't relate similar words). Learned embeddings are
+**dense, low-dimensional**, and place similar words near each other.
+
+Two ways to learn them:
+- **Count-based** (LSA, GloVe) — build a **co-occurrence matrix** (how often A appears near B), then
+  reduce dimensionality (SVD/PCA — [[pca-svd]]). *Pros:* fast, interpretable statistics. *Cons:* static,
+  no deep context, struggle with rare/unseen words.
+- **Prediction-based** (Word2Vec skip-gram/CBOW, FastText, ELMo/BERT/GPT) — train a network to
+  **predict context from target** (or vice versa); similar-context words get similar vectors. *Pros:*
+  better semantics, stronger downstream, adaptable. *Cons:* more compute, less interpretable.
+
+**Contextual embeddings** (BERT/GPT) change the vector **per context** — resolving the "bank" ambiguity
+that static Word2Vec/GloVe can't (they give one vector regardless of sentence). Static-embedding
+problems: **polysemy** (one vector per word), **no context sensitivity**, **order ignored**, **bias**
+from training data, poor on rare words.
+
+### Word2Vec — CBOW, skip-gram, negative sampling
+
+Word2Vec is a **shallow net (one hidden layer)** that produces **continuous, fixed-dimension**
+(`d_model` ~ 100s–1000s) embeddings; the learned vectors are read off the **projection layer**.
+- **CBOW** (Continuous Bag of Words) — predict the **target** token from the **average** of its context
+  token embeddings (window size `C` each side). Faster.
+- **Skip-gram** — predict each **context** token from the **target**. Slower (each target makes `2C`
+  training points) but better on rare words.
+- **Negative sampling** — the full softmax over `|V|` is too expensive, so reframe as **binary
+  classification**: distinguish the true context word from a few **sampled negatives** — avoids the
+  `O(|V|)` normalization sum. (Same large-vocab-softmax problem and family of fixes as [[nlp-classical]].)
 
 ---
 

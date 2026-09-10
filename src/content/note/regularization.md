@@ -1,9 +1,9 @@
 ---
 title: "Regularization: L2 vs Dropout vs Early Stopping"
-description: "L2 vs dropout vs early stopping mechanics, L1 vs L2, L2-penalty vs decoupled weight decay (AdamW: identical for SGD, differ under Adam's `1/√v` scaling), inverted dropout, early-stopping↔L2, other approaches, reg term & validation loss"
+description: "L2 vs dropout vs early stopping mechanics, L1 vs L2 (+ geometry & Elastic Net), L2-penalty vs decoupled weight decay (AdamW), inverted dropout, early-stopping↔L2, regularization-as-prior (MAP), implicit regularization (GD large-step / SGD stable-gradients), noise injection (input/weight/label smoothing), ensembling-as-regularization, reg term & validation loss"
 category: "Generalization & Model Fitting"
-order: 25
-updatedDate: "2026-08-27T20:28:05.187Z"
+order: 27
+updatedDate: "2026-09-10T21:27:28.799Z"
 ---
 Three common techniques to fight **overfitting**, each with a distinct mechanism.
 
@@ -55,6 +55,22 @@ schedules. This is why **AdamW is the default for modern transformer training**,
 weight decay" shorthand is silently wrong for Adam. (Momentum alone causes only a *mild* version of this
 — the `λθ` term entering the velocity EMA; the `√v` scaling is the dominant effect. See [[momentum]],
 [[learning-rate]].)
+
+### L1 vs L2 geometry, and Elastic Net
+
+**Why L1 → sparsity, L2 → shrinkage:** L1's `|w|` has a **kink at 0** (constant-magnitude gradient `±λ`
+that doesn't shrink as `w→0`) → strong pull to **exact zeros**. L2's smooth gradient `2λw` shrinks
+proportionally but **rarely reaches zero**. Geometrically, L1's **diamond** constraint region has
+**corners** on the axes that the optimum tends to hit (→ zeros); L2's **circle** has no corners.
+
+**Elastic Net** = both penalties: `L = L₀ + λ₁‖w‖₁ + λ₂‖w‖₂²` (or `λ(α‖w‖₁ + (1−α)‖w‖₂²)`). L1 gives
+sparsity, L2 smooth small weights, `α` balances them. **Better than pure Lasso when features are
+correlated** (Lasso arbitrarily picks one of a correlated group; Elastic Net keeps them). Cons: more
+hyperparameters, noisier selection, slower.
+
+> **Squared L2 vs L2 norm as a penalty:** use the **squared** L2 (`‖w‖²`) — it's smooth/differentiable
+> everywhere (a polynomial), strictly convex, and its gradient is clean (`2λw`, or `λw` with the ½
+> convention). The plain L2 norm has a `√` → not differentiable at 0 and costlier.
 
 ---
 
@@ -154,4 +170,46 @@ $$L_{train} = L_{data} + \lambda \Sigma w^2 \qquad L_{val} = L_{data}\ \text{onl
 - **Decoupled weight decay (AdamW):** the penalty lives in the *optimizer step*, not the loss —
   so the computed loss never includes it on train *or* val.
 
-Related: [[overfitting-underfitting]]
+---
+
+## Explicit regularization as a prior (MAP)
+
+Explicit regularization adds a term `λ·g(φ)` that's **larger for less-preferred parameters**:
+`φ̂ = argmin Σ lᵢ + λ·g(φ)`. This term can be read as a **prior** `Pr(φ)` encoding beliefs about the
+parameters *before* seeing data → minimizing the regularized loss is **maximum a posteriori (MAP)**
+estimation (vs plain MLE for the unregularized loss). L2 ↔ a Gaussian prior on the weights.
+
+## Implicit regularization (GD & SGD)
+
+Regularization can arise from the **optimizer itself**, not an added term:
+- **GD** — full-batch gradient descent generalizes better with **larger step sizes** (an implicit bias).
+- **SGD** — implicitly favors regions where **gradients are stable** (all batches agree on the slope).
+  This changes the *trajectory*, not the location of the global minimum. **SGD generalizes better than
+  full-batch GD, and smaller batches often beat larger ones** — the noise lets it explore different
+  parts of the loss surface. (The batch-size/LR ratio matters for generalization.)
+
+## Adding noise as regularization
+
+- **Input noise** — smooths the learned function.
+- **Weight noise** — pushes toward **wide, flat minima** where individual weights don't matter much
+  (robust).
+- **Label noise / label smoothing** — train against a target where the true class has probability
+  `1−p` and the rest share `p` equally. Stops the model becoming **over-confident** (over-confident
+  models generalize worse, are poorly calibrated, and overfit noisy labels).
+
+**Early stopping ≈ L2:** since weights start small, stopping early means they **don't have time to grow**
+— similar effect to an explicit L2 penalty (already noted above).
+
+## Ensembling as regularization
+
+Average several models' predictions (mean of outputs for regression, mean of **pre-softmax** activations
+for classification) — independent errors cancel. Get diversity from different **random inits**,
+**bagging** (resample data with replacement), or different hyperparameters/model families ([[ensembles]]).
+
+## Other approaches
+
+Transfer learning, multi-task learning, data augmentation.
+
+---
+
+Related: [[overfitting-underfitting]], [[ensembles]], [[double-descent]], [[loss-functions]], [[learning-rate]]

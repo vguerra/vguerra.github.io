@@ -2,7 +2,7 @@
 title: "Beam Search Decoding"
 description: "breadth-limited decoding: beam/width/log-prob score, algorithm (top-k of all extensions then split completed/active), greedy vs beam, not globally optimal, length bias & normalization (`length^α`, the raw-score short-sequence bias), beam vs sampling (likelihood trap)"
 category: "Transformers & Sequence Models"
-order: 39
+order: 51
 updatedDate: "2026-09-04T20:13:00.429Z"
 ---
 A **breadth-limited** search for sequence generation — a middle ground between **exhaustive** search

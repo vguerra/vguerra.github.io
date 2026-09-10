@@ -1,10 +1,44 @@
 ---
 title: "Tokenization"
-description: "how BPE/WordPiece handles rare words, numbers, code"
+description: "token granularity levels (word/subword/char/byte table), vocabulary & special tokens, subword algorithms (BPE/WordPiece/Unigram), how BPE/WordPiece handles rare words, numbers, code"
 category: "Transformers & Sequence Models"
-order: 37
-updatedDate: "2026-07-04T19:31:37.838Z"
+order: 48
+updatedDate: "2026-09-10T21:28:56.993Z"
 ---
+## Token granularity levels
+
+A **token** is an arbitrarily-defined unit of text. The level trades vocabulary size against sequence
+length:
+
+| Level | Unit | Pros | Cons |
+|---|---|---|---|
+| **Word** | each word | intuitive, fewer tokens (fast inference) | huge vocab, **OOV** words unhandled |
+| **Subword** (BPE/WordPiece) | word pieces | smaller vocab, captures roots, handles OOV | more complex, longer input |
+| **Character** | each char | tiny vocab, no OOV | very long input, embeddings less meaningful |
+| **Byte** | raw byte | any language/emoji, tiny vocab | very long input, hard to interpret |
+
+**Subword wins** in practice: it leverages **root meanings** (run/runner/running share a root) and
+minimizes **OOV** by recognizing small variations. Finer tokens → smaller vocab; multilingual corpora →
+larger vocab.
+
+**Vocabulary** = the fixed set of tokens, including **special tokens**: `[PAD]` (pad to max length),
+`[UNK]` (out-of-vocabulary). A **tokenizer** converts text ↔ tokens (**encode** / **decode**) and is
+either **rule-based** (no training) or **learned** (trained on data). **Normalization** first handles
+inconsistencies: lowercasing, accent removal, unusual Unicode.
+
+## Subword algorithms
+
+- **BPE (Byte-Pair Encoding)** — start from characters; repeatedly **merge the most frequent adjacent
+  pair** into a new token, recording merge rules, until the target vocab size. Encoding applies the merge
+  rules in learned order. **Frequency-based → fast.**
+- **WordPiece** — like BPE but merges the pair giving the biggest **language-model likelihood**
+  improvement (not raw frequency). Needs expensive scoring passes; with lots of data, quality ≈ BPE.
+- **Unigram** — starts from a **large** vocab and **iteratively discards** the tokens that hurt the
+  corpus likelihood least (EM to score each subword). Encoding picks the **highest-probability
+  segmentation** of a word. Assumes token probabilities are independent.
+
+---
+
 ## How Tokenization Affects Rare Words, Numbers, and Code
 
 BPE/WordPiece builds vocabulary from frequency — infrequent patterns get split into smaller subword pieces.
