@@ -2,7 +2,7 @@
 title: "Class Imbalance & Weighted Sampling"
 description: "why accuracy misleads + metrics (precision/recall/F1/AUROC/AUPRC/MCC/κ), sampling strategies (over/under/SMOTE), `WeightedRandomSampler` math (`w_c=1/n_c` derivation, construction pattern, replacement/0.632), class-weighted & focal loss, sampling↔loss-weighting equivalence, stratified vs balanced, calibration caveat, BN interaction"
 category: "Generalization & Model Fitting"
-order: 29
+order: 34
 updatedDate: "2026-08-26T10:29:12.465Z"
 ---
 Skewed class distributions (fraud 99.9% legit, rare-disease imaging, spam) break naive training:

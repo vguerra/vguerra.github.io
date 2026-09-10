@@ -2,7 +2,7 @@
 title: "Learning-Rate Schedulers"
 description: "why constant LR is suboptimal (condition-number oscillation, `η·σ²` noise ball, Robbins-Monro two-sum conditions); schedulers (Step/MultiStep/Exponential/Cosine/SGDR/CLR/OneCycle/ReduceLROnPlateau); warmup & why transformers need it (Adam 2nd-moment init + softmax saturation); LR finder, linear-vs-√k batch scaling; PyTorch mechanics & common mistakes (per-epoch vs per-batch, ordering, constructor implicit step, save state); practical guidelines by model type"
 category: "Training Dynamics & Optimization"
-order: 23
+order: 24
 updatedDate: "2026-08-25T11:48:05.159Z"
 ---
 A fixed LR forces a tradeoff: **large** → fast early progress but oscillation near minima; **small** →

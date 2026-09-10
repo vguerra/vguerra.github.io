@@ -1,10 +1,61 @@
 ---
 title: "Linear Algebra Basics"
-description: "singular matrices (equivalent characterizations, why they break OLS), near-singular / condition number, detecting rank-deficiency"
+description: "vectors (dot/outer product, L0–L∞ norms, independence), matrix fundamentals (linear transforms, inverse, determinant, derivative/gradient/Jacobian/Hessian hierarchy); singular matrices (equivalent characterizations, why they break OLS), near-singular / condition number, detecting rank-deficiency"
 category: "Math Foundations"
-order: 41
-updatedDate: "2026-07-25T19:50:03.824Z"
+order: 53
+updatedDate: "2026-09-10T21:09:48.293Z"
 ---
+## Vectors
+
+### Dot product
+`a·b = Σ aᵢbᵢ` — measures **how much one vector points along another** (`a·b = ‖a‖‖b‖cosθ`).
+- **> 0** if angle < 90°, **= 0** if orthogonal (90°), **< 0** if > 90°.
+- The unit vector `v` maximizing `u·v` is **`v = u/‖u‖`** (same direction, cosθ=1).
+- Basis of QKᵀ attention scores, cosine similarity, projections.
+
+### Outer product
+Column × row → a **matrix**: `a bᵀ`, with `(a bᵀ)ᵢⱼ = aᵢbⱼ`. Always **rank-1**. Uses: building rank-1
+matrices, expressing a matrix as a **sum of outer products** (SVD/PCA/matrix factorization), the `QKᵀ`
+similarity matrix in attention ([[self-attention]]), feature-interaction modeling.
+
+### Norms (vector length/magnitude)
+Properties every norm satisfies: non-negativity, definiteness (only `0` has norm 0), scaling
+(`‖αv‖=|α|‖v‖`), triangle inequality (`‖u+v‖≤‖u‖+‖v‖`).
+
+| Norm | Formula | Notes |
+|---|---|---|
+| **L0** (pseudo-norm) | # non-zero elements | sparse optimization / compressed sensing |
+| **L1** (Manhattan) | `Σ|xᵢ|` | total abs deviation; **promotes sparsity** (Lasso) |
+| **L2** (Euclidean) | `√(Σxᵢ²)` | standard distance/length |
+| **Lp** | `(Σ|xᵢ|ᵖ)^{1/p}` | general form |
+| **L∞** (max) | `max|xᵢ|` | largest-magnitude coordinate |
+
+A **norm** applies to a single vector; a **metric** is a distance between two points. **Every norm
+induces a metric** (L2→Euclidean, L1→Manhattan, L∞→max-coordinate). Vectors are **linearly independent**
+if neither is a scalar multiple of the other. See [[regularization]] for L1/L2 as penalties.
+
+---
+
+## Matrix Fundamentals
+
+- **Linear transformation:** `A ∈ ℝ^{m×n}` applied to `x ∈ ℝⁿ` gives `Ax ∈ ℝᵐ` — a matrix *is* a linear
+  map between spaces.
+- **Inverse:** `A⁻¹` with `AA⁻¹ = I`. Exists iff `A` is **square, full-rank** (linearly independent
+  rows/cols), **non-zero determinant** (see Singular Matrices below).
+- **Determinant:** the **volume-scaling factor** of the transform (area in 2-D, volume in 3-D).
+  **Positive** → orientation preserved; **negative** → orientation flipped; **`det=0`** → **singular**
+  (squashes space into a lower dimension → not invertible).
+
+### Derivative → Gradient → Jacobian → Hessian (the hierarchy)
+| Object | Applies to | Shape |
+|---|---|---|
+| **Derivative** | scalar → scalar | scalar |
+| **Gradient** | scalar of **many** vars | vector of partials |
+| **Jacobian** | **vector**-valued of many vars | matrix (each row = gradient of one output) |
+| **Hessian** | scalar of many vars, 2nd order | matrix of 2nd partials (curvature — see [[optimization]]) |
+
+---
+
 ## Singular Matrices
 
 A square matrix is **singular** when it is **not invertible** — there is no `A⁻¹` with

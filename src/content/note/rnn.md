@@ -2,8 +2,8 @@
 title: "RNNs — Elman Cell, BPTT, and Gating"
 description: "Elman cell (`h_t = tanh(W_ih x_t + W_hh h_{t-1} + b)`, shapes, why tanh), BPTT vanishing/exploding (two factors: `W_hh` spectral norm *and* `tanh'≤1`), weight sharing, how gating fixes it (additive cell state `c_t = f_t⊙c_{t-1}+i_t⊙g_t`, `∂c_t/∂c_{t-1}=f_t≈1` = gated residual highway / constant error carousel), LSTM vs GRU"
 category: "Transformers & Sequence Models"
-order: 32
-updatedDate: "2026-08-30T13:59:21.722Z"
+order: 43
+updatedDate: "2026-09-10T21:19:50.561Z"
 ---
 An RNN processes **sequential** data by maintaining a **hidden state** that carries information from
 previous timesteps. Unlike feed-forward nets, it **shares the same parameters across all timesteps** —
@@ -98,6 +98,15 @@ highway.
 
 The recurrent-vs-parallel training/inference duality (and how linear attention is a "fast-weight" RNN)
 is in [[attention-free-architectures]].
+
+## Dropout in RNNs
+
+Naive dropout breaks recurrence — you can't drop a *different* random set of recurrent units at every
+timestep or you destroy the memory. Three placements:
+- **Input dropout** — on the inputs feeding the cell (regularizes input features). Safe.
+- **Recurrent dropout** (hidden → hidden) — needs the **same mask at every timestep** of a sequence
+  (**variational dropout**), else it corrupts the state across time.
+- **Between layers** — dropout between stacked RNN layers (PyTorch's `dropout=` arg applies here).
 
 ---
 

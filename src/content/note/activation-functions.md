@@ -2,7 +2,7 @@
 title: "Activation Functions"
 description: "why non-linearity, ReLU/LeakyReLU/PReLU (dying ReLU), sigmoid/tanh (derivatives 0.25/1, zero-centering, `tanh=2σ(2x)−1`), GELU (`x·Φ(x)`, GPT/BERT), Swish/SiLU (self-gated, GELU≈SiLU cousins), SwiGLU/GeGLU gated FFN (LLaMA), practice table, interview Q&A"
 category: "Misc ML Concepts"
-order: 64
+order: 84
 updatedDate: "2026-09-06T13:49:27.491Z"
 ---
 Activations inject **non-linearity**. Without them, stacking linear layers **collapses to a single

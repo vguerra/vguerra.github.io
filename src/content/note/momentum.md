@@ -2,7 +2,7 @@
 title: "Momentum & Nesterov"
 description: "why momentum (narrow-valley oscillation / ill-conditioning, SGD noise cancels while signal accumulates); velocity EMA `v=μv+g`, steady-state `g/(1−μ)` (10× at μ=0.9), `1/(1−μ)` window, noise reduction; dampening τ; Nesterov lookahead (conceptual + PyTorch reformulated forms, anticipatory braking); Adam connection"
 category: "Training Dynamics & Optimization"
-order: 21
+order: 22
 updatedDate: "2026-08-27T20:21:47.036Z"
 ---
 Vanilla gradient descent is **memoryless** — each step uses only the current gradient — which causes

@@ -2,7 +2,7 @@
 title: "Taylor Series"
 description: "definition, common expansions, computation, relevance to ML"
 category: "Math Foundations"
-order: 42
+order: 56
 updatedDate: "2026-07-05T12:13:51.020Z"
 ---
 ## Definition
