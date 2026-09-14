@@ -2,7 +2,7 @@
 title: "Residual Networks"
 description: "degradation problem, residual blocks (`x+f(x)`, additive change), shattered gradients & shorter gradient paths, order of ops (activation-first), exploding-variance (why BN needed), why ResNets work (ensembles of shallow nets, smoother surface, wider>deeper), architectures (ResNet/bottleneck/DenseNet/U-Net)"
 category: "Misc ML Concepts"
-order: 85
+order: 87
 updatedDate: "2026-09-10T21:25:52.325Z"
 ---
 Increasing depth indefinitely **stops helping** — past a point deep plain nets become **hard to train**
