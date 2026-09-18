@@ -2,7 +2,7 @@
 title: "Triton: ReLU — Branchless Clamp, Fusion, Tile-Level Ops"
 description: "Triton ReLU: branchless clamp `tl.maximum(x,0.0)` vs warp divergence from `if`, `tl.where` bool-tile cost, `0.0`-literal dtype gotcha, mask protects the store, roofline (0.125 ops/byte → fused not standalone), cross-kernel intensity ladder, `num_warps`, tile-level-ops philosophy"
 category: "GPU / Kernels"
-order: 81
+order: 84
 updatedDate: "2026-09-12T21:48:38.760Z"
 ---
 ReLU is a pure pointwise map — no cross-lane dependency, no reduction, no shared memory. Same
