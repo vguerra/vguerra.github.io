@@ -2,7 +2,7 @@
 title: "Triton: Max Reduction — Identity, Bit-Exactness, Single-Tile Pattern"
 description: "max reduction: `−∞` identity (discard-by-comparison), whole-array-in-one-tile (no pre-zero, `next_power_of_2`), **bit-exact under reordering** (unlike sum → strict `==`), roofline 0.25 op/byte + launch-overhead-dominated, two-stage scratch fallback beyond register cap, `atomic_max` is integer-typed caveat, sentinel table (−∞/+∞/0/1)"
 category: "GPU / Kernels"
-order: 81
+order: 84
 updatedDate: "2026-09-16T20:44:49.264Z"
 ---
 Max is a reduction like sum ([[triton-sum-reduction]]) but with **two key differences**: a natural

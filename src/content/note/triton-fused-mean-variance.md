@@ -2,8 +2,8 @@
 title: "Triton: Fused Mean & Variance — Linearity & the Host Combine"
 description: "one-pass mean+variance via `σ²=E[x²]−E[x]²`: two atomics/program into two scratch buffers, **only linear stats combine across programs** (accumulate Σx/Σx², apply nonlinear identity on host — variance isn't additive), fusion economics (4MB vs 8MB, plain-sum throughput vs half), 0.75 FLOP/byte, catastrophic-cancellation caveat + Welford (doesn't parallelize)"
 category: "GPU / Kernels"
-order: 80
-updatedDate: "2026-09-17T18:53:22.374Z"
+order: 83
+updatedDate: "2026-09-18T06:39:09.056Z"
 ---
 Computing **population mean and variance in one pass** is the right move on a bandwidth-bound device.
 The identity `σ² = E[x²] − E[x]²` lets you reduce **two linear accumulators** (`Σx`, `Σx²`) in a single
@@ -27,6 +27,10 @@ combine is complete. Computing `σ²` inside the kernel and atomic-adding it is 
 
 (This generalizes: it's *why* LayerNorm/BatchNorm reductions accumulate sum and sum-of-squares, not
 variance — [[normalization]].)
+
+**Register tip:** compute the `Σx²` accumulator as **`tl.sum(x * x, axis=0)`**, not by materializing a
+separate `x²` tile — folding the square into the reduction keeps only `x` live and **halves register
+pressure** (→ higher occupancy). See [[triton-perf-tips]].
 
 ## Fusion economics
 

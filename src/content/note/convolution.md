@@ -2,7 +2,7 @@
 title: "Convolution (Conv2d)"
 description: "Conv2d: weight sharing & translation equivariance, cross-correlation vs true convolution (framework gotcha), multi-channel formula & shapes `(C_out,C_in,k,k)`, output-size formula, im2col (conv as GEMM), receptive field `1+L(k−1)` (why 2×3×3 beats 5×5), CNN building blocks (filter sizes/1×1/FC↔conv, padding, max-vs-avg pooling, strided-conv, upsampling, CNN-for-text), equivariance-vs-invariance, stride/dilation, spatial-dropout/cutout, applications (YOLO/segmentation), params & MACs-vs-FLOPs"
 category: "Misc ML Concepts"
-order: 91
+order: 94
 updatedDate: "2026-09-10T21:29:10.513Z"
 ---
 The core operation of CNNs. Instead of connecting every input to every output (fully-connected), a
