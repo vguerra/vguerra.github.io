@@ -2,7 +2,7 @@
 title: "Triton: Fused Row-Wise Softmax"
 description: "capstone: fuse max-subtract/exp/sum/divide, one program per row; **row-parallel vs per-array** (disjoint output rows → no atomics/scratch/combine), `−∞` sentinel double-duty (lose max + exp→0), load-row-once-reuse-in-registers (2.5× less traffic than 3-kernel), online-softmax cap → FlashAttention, max-subtract stability, store-mask silent-corruption pitfall"
 category: "GPU / Kernels"
-order: 81
+order: 84
 updatedDate: "2026-09-20T16:04:17.030Z"
 ---
 The capstone of the reduction series — fuse **max-subtract → exp → sum → divide** into one program per

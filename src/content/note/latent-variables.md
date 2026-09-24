@@ -2,7 +2,7 @@
 title: "Latent Variables & Generative Models"
 description: "latent variables (data lower-D than observed), generative models (simple latent prior → complex data via deep net), skeleton behind VAE/GAN/flows/diffusion"
 category: "Misc ML Concepts"
-order: 91
+order: 94
 updatedDate: "2026-09-10T21:28:43.769Z"
 ---
 Data is often **lower-dimensional** than the raw number of observed variables suggests — each example can

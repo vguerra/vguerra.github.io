@@ -2,7 +2,7 @@
 title: "Triton: Row-Wise LogSumExp"
 description: "row-wise LSE `m+log(Σexp(x−m))`: same row-parallel shape/stability as softmax but emits 1 scalar/row (asymmetric output bandwidth 4MN in / 4M out), fusion ~2× (or ~4× if naive spills the exp tile), pitfalls (add-max-back canonical bug, `−∞` sentinel, log-on-scalar-not-per-lane)"
 category: "GPU / Kernels"
-order: 80
+order: 83
 updatedDate: "2026-09-20T16:37:08.944Z"
 ---
 LogSumExp (LSE) emits **one scalar per row** instead of a normalized row — but it shares the **entire

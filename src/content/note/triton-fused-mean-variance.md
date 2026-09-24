@@ -2,7 +2,7 @@
 title: "Triton: Fused Mean & Variance — Linearity & the Host Combine"
 description: "one-pass mean+variance via `σ²=E[x²]−E[x]²`: two atomics/program into two scratch buffers, **only linear stats combine across programs** (accumulate Σx/Σx², apply nonlinear identity on host — variance isn't additive), fusion economics (4MB vs 8MB, plain-sum throughput vs half), 0.75 FLOP/byte, catastrophic-cancellation caveat + Welford (doesn't parallelize)"
 category: "GPU / Kernels"
-order: 83
+order: 86
 updatedDate: "2026-09-18T06:39:09.056Z"
 ---
 Computing **population mean and variance in one pass** is the right move on a bandwidth-bound device.

@@ -2,7 +2,7 @@
 title: "Triton: L2 Norm — Reduction with an In-Tile Fused Transform"
 description: "reduction with in-tile fused transform: `√(Σx²)` = fold square before tree + host sqrt after; reduce-of-transform generalization (L2 square / L1 abs / logsumexp exp / count predicate), sentinel must respect transform dynamic range (`0.0` = identity + overflow-safe), 4N vs 12N bandwidth, non-linearity pitfalls (square before / sqrt after combine)"
 category: "GPU / Kernels"
-order: 82
+order: 85
 updatedDate: "2026-09-18T07:06:28.977Z"
 ---
 L2 norm = `√(Σ xᵢ²)`. It's a **sum reduction** ([[triton-sum-reduction]]) with a **square folded in

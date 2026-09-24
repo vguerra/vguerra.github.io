@@ -2,7 +2,7 @@
 title: "Loss Functions"
 description: "choosing-the-right-loss table (MSE/BCE/CCE/Hinge + output activations), MSE (Gaussian MLE, outlier-sensitivity), cross-entropy from logits (softmax → −log p_true, log-sum-exp stability, `torch.max` placement), CE↔KL divergence, clean gradient forms (`ŷ−y`, `p−1_true`) & exponential-family reason, why CE not MSE (sigmoid saturation), Hinge loss (SVM/margin vs calibrated probs), Huber (δ, smooth L1), **maximum-likelihood recipe** (choose distribution → predict its params → minimize NLL; Gaussian→MSE, Bernoulli→BCE, categorical→CE), heteroscedastic regression (predict μ & σ²), robust/quantile/focal/ranking losses, loss = MLE-under-noise unifying frame"
 category: "Misc ML Concepts"
-order: 89
+order: 92
 updatedDate: "2026-09-10T21:26:12.257Z"
 ---
 Quick map: **MSE** for numeric predictions, **cross-entropy** for choosing among classes,

@@ -2,7 +2,7 @@
 title: "Triton: Sum Reduction — Atomics, Contention, Reproducibility"
 description: "first reduction kernel: reduce-then-atomic pattern (tile→`tl.sum` in registers→one `tl.atomic_add`/program), must `out.zero_()` (atomic accumulates), operation-specific sentinel (`other=0.0` for sum vs −inf for max), atomic contention (G serialized L2 round-trips vs N per-lane), roofline 0.25 FLOP/byte, `tl.sum` internals (warp-shuffle + shared-mem), float non-associativity → non-reproducible (atol+rtol)"
 category: "GPU / Kernels"
-order: 85
+order: 88
 updatedDate: "2026-09-15T14:45:37.007Z"
 ---
 A **reduction** collapses an N-element vector into a **single scalar** — the first kernel where the
