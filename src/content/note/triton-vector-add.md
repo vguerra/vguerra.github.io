@@ -1,9 +1,9 @@
 ---
 title: "Triton: Vector Add — Tile/Mask, Coalescing, Roofline"
-description: "Triton tile-and-mask model via vector add: author-vs-compiler contract (+ warp latency hiding), 1-D grid / `program_id` / `offs`, `constexpr` BLOCK_SIZE, block-size↔program-count & launch-overhead (~5–10 μs fixed), tail mask (`offs < N`, correctness not perf), memory coalescing (128 B transactions, stride penalty, free in Triton), L2 incidental (runs at HBM speed), roofline & arithmetic intensity (vector add ~0.083 FLOP/byte memory-bound, ridge point ~10, matmul `O(BLOCK_K)` reuse → compute-bound), pitfalls (mask, constexpr, power-of-two, fusion removes HBM round-trips)"
+description: "Triton tile-and-mask model via vector add: author-vs-compiler contract (+ warp latency hiding), 1-D grid / `program_id` / `offs`, `constexpr` BLOCK_SIZE, block-size↔program-count & launch-overhead (~5–10 μs fixed), tail mask (`offs < N`, correctness not perf), memory coalescing (128 B transactions, stride penalty, free in Triton), L2 incidental (runs at HBM speed), roofline & arithmetic intensity (vector add ~0.083 FLOP/byte memory-bound, ridge point ~10, matmul reuse (`BM·BN/2(BM+BN)`, tile-size not BLOCK_K) → compute-bound), pitfalls (mask, constexpr, power-of-two, fusion removes HBM round-trips)"
 category: "GPU / Kernels"
-order: 88
-updatedDate: "2026-09-10T21:05:08.399Z"
+order: 91
+updatedDate: "2026-09-21T19:50:13.764Z"
 ---
 Elementwise vector add is the **canonical pointwise map**: every output element depends on exactly one
 element of each input, nothing else. **No reduction, no cross-program communication, no shared memory,
@@ -122,12 +122,13 @@ intensity.)
 | **Vector add** | ~0.083 FLOP/byte | memory-bound |
 | **Pointwise activations** (ReLU/GELU/SiLU) | ~0.1 | memory-bound |
 | **Fused softmax** (per-row: max, exp, normalize) | ~0.3 | memory-bound |
-| **Tiled matmul** | **O(BLOCK_K)** — tunable | compute-bound once BLOCK_K ~ tens |
+| **Tiled matmul** | `BM·BN / 2(BM+BN)` — tunable | compute-bound with sensible tiles |
 
-The matmul is the interesting case: each loaded operand tile of depth `BLOCK_K` is **reused** across
-`BLOCK_M`/`BLOCK_N` output lanes, so **intensity scales with `BLOCK_K`** — data reuse is what pushes it
-across the ridge into compute-bound territory. (This is the same "reuse → arithmetic intensity" idea
-behind im2col-as-GEMM in [[convolution]].)
+The matmul is the interesting case: each loaded operand slab is **reused** across the output tile, so
+**intensity scales with the output-tile size `BLOCK_M`/`BLOCK_N`** (≈ `T/4` for a square `T×T` tile;
+`BLOCK_K` cancels out — it's a scheduling knob, not an intensity knob). Data reuse is what pushes matmul
+across the ridge into compute-bound territory — full derivation in [[triton-tiled-matmul]]. (Same "reuse
+→ arithmetic intensity" idea behind im2col-as-GEMM in [[convolution]].)
 
 ---
 

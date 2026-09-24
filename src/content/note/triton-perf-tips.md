@@ -2,7 +2,7 @@
 title: "Triton — Kernel Authoring & Perf Tips"
 description: "reusable Triton micro-optimizations: prefer multiply-by-precomputed-reciprocal over divide-by-constant (e.g. GELU's `/√2`, `√(2/π)`); fuse elementwise into reduction `tl.sum(x*x)` (don't materialize intermediates → halve register pressure → higher occupancy, unless reused); constant vs runtime divisor caveat"
 category: "GPU / Kernels"
-order: 86
+order: 89
 updatedDate: "2026-09-18T06:39:02.801Z"
 ---
 Small, reusable micro-optimizations for writing fast Triton kernels. (Kernel fundamentals:
