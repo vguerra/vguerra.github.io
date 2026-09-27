@@ -2,7 +2,7 @@
 title: "Triton: Tiled Transpose — Coalescing Is the Whole Game"
 description: "pure permutation (no arithmetic/reduction) → coalescing is the only lever: scalar transpose writes column-strided (1 elem/cache line), tiled loads to registers + stores transposed; 2-D tile map without reduction, transpose via store stride-swap, one shared mask; tiling changes **achieved bandwidth** (4×) not intensity; cache-line-matched blocks (32), shared-mem padded variant for peak"
 category: "GPU / Kernels"
-order: 80
+order: 82
 updatedDate: "2026-09-24T20:00:05.836Z"
 ---
 `A (M,N) → out (N,M)` with `out[i,j] = A[j,i]`. **No arithmetic, no reduction** — a pure permutation of

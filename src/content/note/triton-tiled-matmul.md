@@ -2,7 +2,7 @@
 title: "Triton: Tiled Matrix Multiply — Reuse Crosses the Roofline"
 description: "first **compute-bound** kernel: reuse via tiling crosses the roofline; 2-D grid mirrors output (private per-tile K-reduction, no cross-program combine), SRAM operand staging + register accumulator + `num_stages` pipelining, L2 super-grouping, AI = `BM·BN/2(BM+BN)` (=16 at 64×64, BLOCK_K cancels), `tl.dot`→tensor-core MMA + swizzle, pitfalls (fp32 accumulator, K mask, stride-order = AᵀB bug)"
 category: "GPU / Kernels"
-order: 82
+order: 84
 updatedDate: "2026-09-21T19:50:05.595Z"
 ---
 `A (M,K) @ B (K,N) → C (M,N)`. In a **naive** matmul every element of A is read **N** times (once per
