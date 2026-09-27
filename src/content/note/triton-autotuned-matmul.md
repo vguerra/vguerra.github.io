@@ -2,7 +2,7 @@
 title: "Triton: Autotuned Matmul"
 description: "`@triton.autotune` over small config space (compile+bench all on first call, cache winner by shape); **callable grid** lambda over meta-dict (block sizes unknown until sweep), config = tile+num_warps+num_stages, mask discipline makes search robust, register-pressure binding constraint (spills), shape-sensitivity (tile coverage + wave quantization), pitfalls (space-too-wide hangs, static-grid NameError, missing kwargs → re-tune, per-process cache)"
 category: "GPU / Kernels"
-order: 81
+order: 83
 updatedDate: "2026-09-23T14:21:12.898Z"
 ---
 Same tiled matmul kernel ([[triton-tiled-matmul]]) — the **only** change is a `@triton.autotune`

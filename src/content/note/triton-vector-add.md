@@ -2,7 +2,7 @@
 title: "Triton: Vector Add — Tile/Mask, Coalescing, Roofline"
 description: "Triton tile-and-mask model via vector add: author-vs-compiler contract (+ warp latency hiding), 1-D grid / `program_id` / `offs`, `constexpr` BLOCK_SIZE, block-size↔program-count & launch-overhead (~5–10 μs fixed), tail mask (`offs < N`, correctness not perf), memory coalescing (128 B transactions, stride penalty, free in Triton), L2 incidental (runs at HBM speed), roofline & arithmetic intensity (vector add ~0.083 FLOP/byte memory-bound, ridge point ~10, matmul reuse (`BM·BN/2(BM+BN)`, tile-size not BLOCK_K) → compute-bound), pitfalls (mask, constexpr, power-of-two, fusion removes HBM round-trips)"
 category: "GPU / Kernels"
-order: 91
+order: 93
 updatedDate: "2026-09-21T19:50:13.764Z"
 ---
 Elementwise vector add is the **canonical pointwise map**: every output element depends on exactly one
