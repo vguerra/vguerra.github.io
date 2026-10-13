@@ -2,7 +2,7 @@
 title: "Triton: Fused Matmul + Bias + ReLU (Epilogue Fusion)"
 description: "**epilogue fusion** (the reason to write Triton kernels): 20MN→4MN activation traffic (5×) + 3 launches→1, bias broadcast is free, epilogue ops raise intensity, **the fusion boundary** (tile-local ok / cross-row needs separate kernel), variants (residual add, quantized output), pitfalls (op order, `bias[None,:]`, bias mask, load-after-K-loop)"
 category: "GPU / Kernels"
-order: 80
+order: 82
 updatedDate: "2026-09-27T20:32:09.531Z"
 ---
 **Epilogue fusion is the canonical optimization that makes writing Triton kernels worth it for
