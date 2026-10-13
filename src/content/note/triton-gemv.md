@@ -2,7 +2,7 @@
 title: "Triton: GEMV (Matrix-Vector Product)"
 description: "matrix-vector: per-row reduction with row-block grouping (BLOCK_M trades `x`-reuse vs SM occupancy), asymmetric reuse (`x` used BLOCK_M×, **A not reused**), AI → 0.5 FLOP/byte vs matmul's 16 → **why LLM decoding is bandwidth-bound but training is compute-bound** (and why batching restores GEMM), broadcast-direction & fp32-accumulator pitfalls"
 category: "GPU / Kernels"
-order: 81
+order: 83
 updatedDate: "2026-09-27T20:08:49.589Z"
 ---
 `A (M,N) @ x (N,) → out (M,)`, with `out[i] = Σⱼ A[i,j]·x[j]`. A rectangular `(BLOCK_M, BLOCK_N)` tile
