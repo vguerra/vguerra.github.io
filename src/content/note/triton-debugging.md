@@ -3,7 +3,7 @@ title: "Debugging Triton Kernels (esp. without error messages)"
 description: "debugging kernels when the platform shows no error text: symptom→cause table (`map::at`, `tl.arange`, wrong numbers, NaN), bisection with one change per submission (beware dead-code elimination), hand-computing tiny cases, asymmetric/unequal-size tests, derive formulas don't copy, keep similar quantities named separately"
 category: "GPU / Kernels"
 order: 80
-updatedDate: "2026-10-05T21:15:42.322Z"
+updatedDate: "2026-10-19T22:45:43.797Z"
 ---
 A workflow distilled from debugging the tiled matmul and FlashAttention kernels on a platform that shows only a failing test and, for compile errors, just a `line:col` position. Related authoring gotchas: [[triton-perf-tips]]. Worked example: [[triton-flash-attention]].
 
@@ -14,6 +14,8 @@ A workflow distilled from debugging the tiled matmul and FlashAttention kernels 
 | Compile error, no readable text, `line:col` only | lowering / constraint failure | bisect (section 2) |
 | Compile error `map::at` | compiler failed to lower an op (version-specific), often `tl.dot` with fp32 operands | give the dot an `input_precision`; check operand dtypes |
 | `tl.arange` complaint | extent not constexpr, or not a power of two | annotate `tl.constexpr` in the kernel **signature**; check the extent |
+| `IncompatibleTypeErrorImpl('invalid operands of type pointer<fp32> and triton.language.float32')` | an arithmetic operator (`*`, `/`, `-`, or `+` with a float) applied to a **pointer**; pointers only support `ptr + integer offset` | label each operand on the failing line as address or value; usually a missing `tl.load`, or one name reused for both a pointer and a value |
+| `PassManager::run failed` | an internal compiler lowering pass failed; generic, no position | check tuple arguments for a trailing comma (`(0)` is an int, `(0,)` a tuple, e.g. `boundary_check` in the block-pointer API), then bisect; the API may also be unsupported in the installed version |
 | Runs, wrong numbers | indexing, mask, broadcast-axis or formula bug | hand-compute a tiny case (section 3) |
 | Runs, correct on some tests only | something that depends on sizes: tail masks, unequal lengths, small dims | add asymmetric tests (section 4) |
 | `NaN` or `inf` in outputs | first-iteration state, `0 * inf`, `0 / 0`, `-inf - (-inf)` | trace the first iteration by hand |
