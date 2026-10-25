@@ -1,9 +1,9 @@
 ---
 title: "Triton — Kernel Authoring & Perf Tips"
-description: "reusable Triton micro-optimizations: prefer multiply-by-precomputed-reciprocal over divide-by-constant (e.g. GELU's `/√2`, `√(2/π)`); fuse elementwise into reduction `tl.sum(x*x)` (don't materialize intermediates → halve register pressure → higher occupancy, unless reused); **pointer-construction discipline** (logical indices → masks in logical coords → strides once; double-offset/relative-mask bugs, hand-check); FlashAttention-debugging gotchas (`tl.arange` constexpr in signature, no scalar tile indexing, `&`-vs-`<` precedence, sentinels on scores not loaded K, `tl.dot` constraints, accumulator shapes); constant vs runtime divisor caveat"
+description: "reusable Triton micro-optimizations: prefer multiply-by-precomputed-reciprocal over divide-by-constant (e.g. GELU's `/√2`, `√(2/π)`); fuse elementwise into reduction `tl.sum(x*x)` (don't materialize intermediates → halve register pressure → higher occupancy, unless reused); **pointer-construction discipline** (logical indices → masks in logical coords → strides once; double-offset/relative-mask bugs, hand-check); FlashAttention-debugging gotchas (`tl.arange` constexpr in signature, no scalar tile indexing, `&`-vs-`<` precedence, sentinels on scores not loaded K, `tl.dot` constraints, accumulator shapes); constant vs runtime divisor caveat, block pointers (`tl.make_block_ptr`) deprecated → tensor descriptors"
 category: "GPU / Kernels"
-order: 93
-updatedDate: "2026-10-05T11:44:52.954Z"
+order: 95
+updatedDate: "2026-10-19T22:45:43.765Z"
 ---
 Small, reusable micro-optimizations for writing fast Triton kernels. (Kernel fundamentals:
 [[triton-vector-add]], [[triton-relu]].)
@@ -74,6 +74,15 @@ The bugs this prevents all compile, run, and give wrong numbers or out-of-bounds
 - **Sentinels go on scores, not on the loaded K.** Load masked K rows with `0.0` so the dot product stays finite, then set the invalid score columns to `-inf` after the dot. Loading K with `-inf` produces `NaN` through `0 * inf`. V's masked rows also get `0.0`.
 - **`tl.dot` constraints.** Operand dtypes must match what the MMA supports (fp32 needs an `input_precision` choice), every dot dimension has a hardware minimum (commonly 16), and the `tl.trans` signature differs across Triton versions. Without error text, localize by the `line:col` prefix and bisect one change at a time.
 - **Accumulator shape in attention.** Per-row max and denominator are `(BLOCK_M,)`; the output accumulator is `(BLOCK_M, BLOCK_DMODEL)`. Rescale the output accumulator with the per-row correction broadcast along the column axis, before adding the new `P @ V` contribution.
+
+## Block pointers are deprecated: tensor descriptors
+
+`tl.make_block_ptr` / `tl.advance` are deprecated in recent Triton. The replacement is the **tensor descriptor**: describe the tensor once (base pointer, shape, strides, block shape), then load or store a block by its starting coordinates. A descriptor is created in the kernel with `tl.make_tensor_descriptor`, or on the host with `TensorDescriptor` (from `triton.tools.tensor_descriptor`) and passed in as an argument. Bounds come from the descriptor's shape, and out-of-range elements load as padding (zeros by default), which replaces the hand-written `mask=..., other=0.0` and the offset arithmetic.
+
+- **Why:** on Hopper and newer NVIDIA GPUs it maps to the hardware bulk-copy engine (TMA), which can beat per-thread pointer computation.
+- **Constraints:** layout rules such as 16-byte stride alignment and a unit stride on the last dimension. Check the Triton docs for the installed version, since the API is recent and changing.
+- **Pitfall with the old API, still seen on platforms with older Triton:** `boundary_check=(0)` is the integer `0`, not a tuple; it must be `(0,)`. The same goes for `order`, shape, strides, offsets and block shape in `make_block_ptr`, which are all tuples. The symptom is not a Python error but `exception: PassManager::run failed`, which means a compiler lowering pass failed (a generic message, no line number), so a missing comma is easy to overlook. Diagnosis: first check every tuple argument for a trailing comma, then bisect (swap loads/stores for plain pointers; drop `padding_option`) one change per submission, and consider that the installed Triton version may not support the API at all. See [[triton-debugging]].
+- **Interview practice:** plain pointer arithmetic with masks remains supported and is what is expected on a whiteboard; the descriptor is a performance layer on top. Know what it saves (offset arithmetic, bound masks) and what it requires (alignment, last-dim stride).
 
 ---
 
