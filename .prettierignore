@@ -6,3 +6,6 @@ node_modules
 
 pnpm-lock.yaml
 dist
+
+# vendored third-party grammars (kept byte-identical to upstream)
+src/grammars
