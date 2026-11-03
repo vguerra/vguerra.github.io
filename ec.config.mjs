@@ -1,3 +1,13 @@
+import { readFileSync } from "node:fs";
+
+// Shiki bundles LLVM IR (as `llvm`) but not MLIR, so MLIR is registered here.
+// Provenance and license: src/grammars/NOTICE.md. The vendored file is left
+// byte-identical to upstream; only the language id is set here.
+const mlir = {
+	...JSON.parse(readFileSync(new URL("./src/grammars/mlir.json", import.meta.url), "utf8")),
+	name: "mlir",
+};
+
 // Lives in its own file (not astro.config.ts) because it contains a function,
 // `themeCssSelector`. The standalone <Code> component, used for the "Cite this
 // post" block, can only read options that live in ec.config.mjs.
@@ -28,6 +38,7 @@ export default {
 		return `[data-theme="${theme.name}"]`;
 	},
 	// One dark, one light theme => https://expressive-code.com/guides/themes/#available-themes
+	shiki: { langs: [mlir] },
 	themes: ["dracula", "github-light"],
 	useThemedScrollbars: false,
 };
