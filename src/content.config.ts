@@ -24,6 +24,8 @@ const post = defineCollection({
 				})
 				.optional(),
 			draft: z.boolean().default(false),
+			// Set `cite: false` to hide the generated BibTeX block at the end of a post.
+			cite: z.boolean().default(true),
 			ogImage: z.string().optional(),
 			tags: z.array(z.string()).default([]).transform(removeDupsAndLowerCase),
 			publishDate: z

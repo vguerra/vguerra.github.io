@@ -1,0 +1,26 @@
+---
+import type { CollectionEntry } from "astro:content";
+import { Code } from "astro-expressive-code/components";
+import { siteConfig } from "@/site.config";
+import { bibtexEntry } from "@/utils/bibtex";
+
+interface Props {
+	post: CollectionEntry<"post">;
+}
+
+const { post } = Astro.props;
+const entry = bibtexEntry({
+	author: siteConfig.author,
+	// Citation keys use the GitHub/X handle, not the display name.
+	handle: "vguerra",
+	title: post.data.title,
+	date: post.data.publishDate,
+	url: new URL(`/posts/${post.id}/`, Astro.site).href,
+});
+---
+
+{/* Excluded from search: the entry would otherwise match every post's keywords. */}
+<section data-pagefind-ignore>
+	<h2>Cite this post</h2>
+	<Code code={entry} lang="bibtex" />
+</section>
