@@ -126,6 +126,18 @@
 	.title {
 		@apply text-accent-2 text-2xl font-semibold;
 	}
+
+	/*
+	 * For post and note bodies. The typography plugin caps the whole `.prose` box
+	 * at 65ch (about 548px in this monospace font), which also boxes in code blocks
+	 * and tables. Pair this with `max-w-none` on the container: code and tables then
+	 * use the full column, while running text stays at a readable measure.
+	 * Admonitions and GitHub cards are left alone so their inner text fills the box.
+	 */
+	.prose-measure
+		:is(p, ul, ol, blockquote, h1, h2, h3, h4, h5, h6):not(:where(.admonition, .github-card) *) {
+		max-width: 65ch;
+	}
 }
 
 @utility prose {
