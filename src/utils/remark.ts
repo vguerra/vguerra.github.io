@@ -17,7 +17,10 @@ export function h(el: string, attrs: Properties = {}, children: any[] = []): P {
 	const { properties, tagName } = _h(el, attrs);
 	return {
 		children,
-		data: { hName: tagName, hProperties: properties },
+		// hName/hProperties are mdast-util-to-hast's extension of `Data`. Under
+		// @astrojs/mdx 8's types, ParagraphData doesn't declare them, so the literal
+		// fails excess-property checks. The assertion type-checks on mdx 7 and 8.
+		data: { hName: tagName, hProperties: properties } as P["data"],
 		type: "paragraph",
 	};
 }
